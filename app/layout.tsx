@@ -1,20 +1,9 @@
 import type { Metadata } from 'next'
-import { Fredoka, Poppins } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import StickyCtas from '@/components/StickyCtas'
 
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['300', '400', '600'],
-  variable: '--font-poppins',
-})
-
-const fredoka = Fredoka({
-  subsets: ['latin'],
-  weight: ['400', '600'],
-  variable: '--font-fredoka',
-})
 
 export const metadata: Metadata = {
   title: 'Way2Pets Lucknow | Natural Pet Care, Boarding & Adoption',
@@ -27,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${fredoka.variable}`}>
+    <html lang="en">
       <head>
         <link
           rel="stylesheet"
@@ -37,6 +26,7 @@ export default function RootLayout({
       <body>
         <Navbar />
         <main>{children}</main>
+        <StickyCtas />
         <Footer />
       </body>
     </html>

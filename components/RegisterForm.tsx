@@ -32,6 +32,7 @@ export default function RegisterForm() {
       if (result.success) {
         setStatus('success')
         form.reset()
+        window.location.href = '/thank-you/register-pet'
       } else {
         setErrorMsg(result.message)
         setStatus('error')

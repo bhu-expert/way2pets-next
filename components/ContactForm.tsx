@@ -27,6 +27,7 @@ export default function ContactForm() {
       if (result.success) {
         setStatus('success')
         form.reset()
+        window.location.href = '/thank-you/contact'
       } else {
         setErrorMsg(result.message)
         setStatus('error')
