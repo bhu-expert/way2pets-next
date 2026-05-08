@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
 import Hero from '@/components/Hero'
 
 export const metadata: Metadata = {
@@ -43,14 +45,14 @@ export default function BlogPage() {
       <div className="blog-grid">
         {posts.map((post) => (
           <article key={post.title} className="blog-card">
-            <img src={post.img} alt={post.alt} className="blog-img" />
+            <Image src={post.img} alt={post.alt} className="blog-img" width={800} height={520} />
             <div className="blog-content">
               <span className="blog-date">{post.date}</span>
               <h3 className="blog-title">{post.title}</h3>
               <p>{post.excerpt}</p>
-              <a href="#" style={{ color: 'var(--accent-orange)', fontWeight: 600, marginTop: '10px', display: 'block' }}>
+              <Link href="/dogs/breeds/top-10-dog-breeds-in-india" style={{ color: 'var(--accent-orange)', fontWeight: 600, marginTop: '10px', display: 'block' }}>
                 Read More &rarr;
-              </a>
+              </Link>
             </div>
           </article>
         ))}

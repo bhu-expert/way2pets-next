@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-})
+import { sendAdminEmail } from '@/lib/email'
+import { insertRow } from '@/lib/supabase'
+import { validateFindPet } from '@/lib/validation'
 
 export async function POST(req: NextRequest) {
-  const { petType, preferredSize, contact } = await req.json()
+  const payload = await req.json()
+  const parsed = validateFindPet(payload)
+
+  if (!parsed.ok) {
+    return NextResponse.json({ success: false, message: parsed.message }, { status: 400 })
+  }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: `New Pet Inquiry: ${petType} - ${preferredSize}`,
-      text: `New Pet Inquiry Details:\n\nLooking For: ${petType}\nPreferred Size/Breed: ${preferredSize}\nContact: ${contact}`,
-    })
+    await insertRow('contact_leads', parsed.data)
+    await sendAdminEmail(
+      `New Pet Inquiry: ${parsed.data.topic}`,
+      `Mobile: ${parsed.data.mobile}\n${parsed.data.message}\nSource: ${parsed.data.source_page}`,
+    )
     return NextResponse.json({ success: true, message: 'Pet inquiry sent successfully!' })
   } catch (error) {
-    console.error('Error sending find pet email:', error)
+    console.error('Error processing find-pet inquiry:', error)
     return NextResponse.json({ success: false, message: 'Failed to send pet inquiry.' }, { status: 500 })
   }
 }

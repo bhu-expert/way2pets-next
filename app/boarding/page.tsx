@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Hero from '@/components/Hero'
 import BoardingForm from '@/components/BoardingForm'
 
@@ -56,9 +57,11 @@ export default function BoardingPage() {
                 </li>
               ))}
             </ul>
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-              alt="Happy dog"
+              alt="Happy dog during home-style boarding in Lucknow"
+              width={800}
+              height={520}
               style={{ marginTop: '20px' }}
             />
           </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import Hero from '@/components/Hero'
 import ContactForm from '@/components/ContactForm'
 
@@ -44,9 +45,11 @@ export default function HomePage() {
       <section style={{ padding: 'var(--section-padding)', background: 'var(--white)' }}>
         <div className="founder">
           <div className="founder-img">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
               alt="Ashish - Founder of Way2Pets"
+              width={800}
+              height={600}
             />
           </div>
           <div className="founder-text">
@@ -75,7 +78,7 @@ export default function HomePage() {
           </div>
           <div className="diff-card">
             <h3>Knowledge You Can Trust</h3>
-            <p>Our founder has 15+ years of hands-on experience with dog behavior, nutrition, and holistic healing. We don't just sell — we educate.</p>
+            <p>Our founder has 15+ years of hands-on experience with dog behavior, nutrition, and holistic healing. We don&apos;t just sell — we educate.</p>
           </div>
         </div>
       </section>
@@ -85,9 +88,11 @@ export default function HomePage() {
         <h2>What We Offer</h2>
         <div className="services-grid">
           <div className="service-card">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-              alt="Dog Boarding"
+              alt="Dog boarding in a home-style Way2Pets environment"
+              width={800}
+              height={520}
             />
             <div className="service-content">
               <h3>Cage-Free Boarding</h3>
@@ -98,9 +103,11 @@ export default function HomePage() {
             </div>
           </div>
           <div className="service-card">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-              alt="Find a Pet"
+              alt="Healthy puppy and kitten guidance at Way2Pets Lucknow"
+              width={800}
+              height={520}
             />
             <div className="service-content">
               <h3>Find Your Pet</h3>
@@ -111,9 +118,11 @@ export default function HomePage() {
             </div>
           </div>
           <div className="service-card">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-              alt="Natural Pet Food"
+              alt="Natural pet food guidance for dogs and cats in Lucknow"
+              width={800}
+              height={520}
             />
             <div className="service-content">
               <h3>Natural Pet Food</h3>
