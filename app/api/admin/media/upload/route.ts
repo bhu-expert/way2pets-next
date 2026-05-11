@@ -21,6 +21,9 @@ export async function POST(req: NextRequest) {
   const title = String(formData.get('title') || '')
   const altText = String(formData.get('altText') || '')
   const caption = String(formData.get('caption') || '')
+  const createGallery = String(formData.get('createGallery') || '') === 'true'
+  const petType = String(formData.get('petType') || 'general')
+  const isFeatured = String(formData.get('isFeatured') || '') === 'on'
 
   if (!(file instanceof File)) {
     return NextResponse.json({ success: false, message: 'Image file is required.' }, { status: 400 })
@@ -71,5 +74,21 @@ export async function POST(req: NextRequest) {
     uploaded_by: user.id,
   })
 
-  return NextResponse.json({ success: true, asset: rows?.[0] || uploaded })
+  const asset = rows?.[0] || uploaded
+  const assetId = typeof asset === 'object' && asset !== null && 'id' in asset ? String(asset.id) : ''
+
+  if (createGallery && assetId) {
+    await insertRow('gallery_images', {
+      media_asset_id: assetId,
+      title,
+      alt_text: altText,
+      caption,
+      category,
+      pet_type: petType,
+      is_visible: true,
+      is_featured: isFeatured,
+    })
+  }
+
+  return NextResponse.json({ success: true, asset })
 }

@@ -51,6 +51,15 @@ export async function getArticle(fullPath: string) {
   }
 }
 
+export async function getPublishedArticles(limit = 24) {
+  try {
+    const rows = await getRows<Article>(`blog_posts?status=eq.published&select=*&order=published_at.desc&limit=${limit}`, false)
+    return rows && rows.length > 0 ? rows : fallbackArticles
+  } catch {
+    return fallbackArticles
+  }
+}
+
 export function renderMarkdown(markdown: string) {
   return markdown.split('\n').filter(Boolean).map((line, index) => {
     if (line.startsWith('# ')) return { type: 'h1', text: line.replace('# ', ''), key: index }

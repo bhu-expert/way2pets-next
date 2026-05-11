@@ -1,5 +1,11 @@
-import AdminTable from '@/components/admin/AdminTable'
+import { notFound } from 'next/navigation'
+import CmsForm from '@/components/admin/CmsForm'
+import { getRow, resources, type CmsRow } from '@/lib/cms'
 
-export default function Page() {
-  return <AdminTable title="Edit Blog Article" description="Edit title, slug, full path, markdown, related articles and SEO fields." columns={['Field', 'Value']} />
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const resource = resources.blog
+  const row = await getRow<CmsRow>(resource.table, id, resource.select || '*')
+  if (!row) notFound()
+  return <CmsForm resourceKey="blog" resource={resource} row={row} />
 }

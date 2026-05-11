@@ -1,5 +1,11 @@
-import AdminTable from '@/components/admin/AdminTable'
+import { notFound } from 'next/navigation'
+import CmsForm from '@/components/admin/CmsForm'
+import { getRow, resources, type CmsRow } from '@/lib/cms'
 
-export default function Page() {
-  return <AdminTable title="Edit Pet Listing" description="Edit pet listing details, photos, price, status and SEO fields." columns={['Field', 'Value']} />
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const resource = resources.pets
+  const row = await getRow<CmsRow>(resource.table, id, resource.select || '*')
+  if (!row) notFound()
+  return <CmsForm resourceKey="pets" resource={resource} row={row} />
 }

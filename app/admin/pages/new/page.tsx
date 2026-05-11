@@ -1,5 +1,6 @@
-import AdminTable from '@/components/admin/AdminTable'
+import CmsForm from '@/components/admin/CmsForm'
+import { resources } from '@/lib/cms'
 
 export default function Page() {
-  return <AdminTable title="New Page" description="Create an admin-managed SEO landing page." columns={['Field', 'Value']} />
+  return <CmsForm resourceKey="pages" resource={resources.pages} row={null} />
 }

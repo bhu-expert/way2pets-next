@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import Hero from '@/components/Hero'
 import FindPetForm from '@/components/FindPetForm'
 
@@ -7,7 +8,16 @@ export const metadata: Metadata = {
   description: 'Find your perfect furry friend. Adopt puppy, kitten, or dog in Lucknow. We have many rescued pets waiting for a forever home. Visit Way2Pets today.',
 }
 
-export default function FindAPetPage() {
+import { getRows } from '@/lib/supabase'
+
+type Pet = { id: string; name: string; slug: string; pet_type: string; breed?: string; age?: string; availability_status?: string; description?: string }
+
+async function getPets() {
+  try { return await getRows<Pet>('pets?status=eq.published&select=*&order=created_at.desc&limit=12', false) || [] } catch { return [] }
+}
+
+export default async function FindAPetPage() {
+  const pets = await getPets()
   return (
     <>
       <Hero
@@ -39,6 +49,25 @@ export default function FindAPetPage() {
           </div>
         </div>
       </section>
+
+      {pets.length > 0 && (
+        <section className="services">
+          <h2>Available Pets</h2>
+          <div className="blog-grid">
+            {pets.map((pet) => (
+              <article key={pet.id} className="blog-card">
+                <div className="blog-content">
+                  <span className="blog-date">{pet.pet_type} · {pet.availability_status || 'available'}</span>
+                  <h3 className="blog-title">{pet.name}</h3>
+                  <p>{pet.breed} {pet.age ? `· ${pet.age}` : ''}</p>
+                  <p>{pet.description}</p>
+                  <Link href={`/pets/${pet.slug}`} style={{ color: 'var(--accent-orange)', fontWeight: 600 }}>View pet →</Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="reviews">
         <h2>Happy Pet Parents</h2>

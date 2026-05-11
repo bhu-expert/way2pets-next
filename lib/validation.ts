@@ -38,6 +38,10 @@ function bool(input: unknown) {
   return input === true || input === 'true' || input === 'yes' || input === 'on'
 }
 
+function spam(raw: Raw) {
+  if (String(raw.website || raw.company || '').trim()) throw new Error('Invalid form submission.')
+}
+
 function wrap<T>(fn: () => T): ValidationResult<T> {
   try {
     return { ok: true, data: fn() }
@@ -47,7 +51,9 @@ function wrap<T>(fn: () => T): ValidationResult<T> {
 }
 
 export function validateContact(raw: Raw) {
-  return wrap(() => ({
+  return wrap(() => {
+    spam(raw)
+    return ({
     name: text(raw.name, 'Name', 2, 120),
     mobile: phone(raw.phone || raw.mobile, 'Mobile number'),
     email: email(raw.email),
@@ -55,22 +61,28 @@ export function validateContact(raw: Raw) {
     message: optionalText(raw.message, 2000),
     source_page: optionalText(raw.sourcePage || raw.source_page, 300),
     lead_status: 'new',
-  }))
+  })
+  })
 }
 
 export function validateFindPet(raw: Raw) {
-  return wrap(() => ({
+  return wrap(() => {
+    spam(raw)
+    return ({
     name: optionalText(raw.name, 120),
     mobile: phone(raw.contact || raw.mobile, 'Mobile number'),
     topic: `Find a pet: ${text(raw.petType, 'Pet type', 2, 80)}`,
     message: `Preferred size/breed: ${text(raw.preferredSize, 'Preferred size or breed', 2, 160)}`,
     source_page: '/find-a-pet',
     lead_status: 'new',
-  }))
+  })
+  })
 }
 
 export function validatePetRegistration(raw: Raw) {
-  return wrap(() => ({
+  return wrap(() => {
+    spam(raw)
+    return ({
     owner_name: text(raw.ownerName || raw.owner_name, 'Owner name', 2, 120),
     mobile: phone(raw.phone || raw.mobile, 'Mobile number'),
     whatsapp: optionalText(raw.whatsapp || raw.phone || raw.mobile, 20),
@@ -85,13 +97,16 @@ export function validatePetRegistration(raw: Raw) {
     purpose: optionalText(raw.purpose, 80),
     notes: optionalText(raw.medical || raw.notes, 2000),
     status: 'new',
-  }))
+  })
+  })
 }
 
 export function validateBoarding(raw: Raw) {
   return wrap(() => {
     const checkIn = date(raw.checkIn || raw.check_in_date, 'Check-in date')
     const checkOut = date(raw.checkOut || raw.check_out_date, 'Check-out date')
+    if (Date.parse(checkOut) <= Date.parse(checkIn)) throw new Error('Check-out date must be after check-in date.')
+    spam(raw)
     const days = Math.max(1, Math.ceil((Date.parse(checkOut) - Date.parse(checkIn)) / 86_400_000))
 
     return {
