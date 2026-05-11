@@ -361,3 +361,57 @@ values
   ('/boarding', '/pet-boarding-for-cat-and-dog-in-lucknow', 301, true),
   ('/pet-dog-cat-boarding-lucknow', '/pet-boarding-for-cat-and-dog-in-lucknow', 301, true)
 on conflict (source_path) do update set destination_path = excluded.destination_path, status_code = excluded.status_code, is_active = excluded.is_active;
+
+-- Editable public website content CMS.
+create table if not exists public.website_sections (
+  id uuid primary key default gen_random_uuid(),
+  section_key text not null unique,
+  title_en text,
+  title_hi text,
+  subtitle_en text,
+  subtitle_hi text,
+  description_en text,
+  description_hi text,
+  image_url text,
+  button_text_en text,
+  button_text_hi text,
+  button_link text,
+  is_active boolean not null default true,
+  sort_order int not null default 0,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.website_section_items (
+  id uuid primary key default gen_random_uuid(),
+  section_key text not null,
+  item_key text not null,
+  title_en text,
+  title_hi text,
+  subtitle_en text,
+  subtitle_hi text,
+  description_en text,
+  description_hi text,
+  image_url text,
+  icon_key text,
+  button_text_en text,
+  button_text_hi text,
+  button_link text,
+  is_active boolean not null default true,
+  sort_order int not null default 0,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint website_section_items_unique_key unique (section_key, item_key)
+);
+
+create index if not exists website_sections_active_order_idx on public.website_sections (is_active, sort_order);
+create index if not exists website_section_items_section_active_order_idx on public.website_section_items (section_key, is_active, sort_order);
+
+alter table public.website_sections enable row level security;
+alter table public.website_section_items enable row level security;
+create policy "public read active website sections" on public.website_sections for select using (is_active = true);
+create policy "public read active website section items" on public.website_section_items for select using (is_active = true);
+create policy "authenticated manage website sections" on public.website_sections for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "authenticated manage website section items" on public.website_section_items for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');

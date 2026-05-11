@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import HomePageContent from '@/components/home/HomePageContent'
 import { getRows } from '@/lib/supabase'
+import { getWebsiteContent } from '@/lib/website-content'
 
 export const metadata: Metadata = {
   title: 'Way2Pets | Natural Pet Care, Boarding & Pet Adoption in Lucknow',
@@ -14,6 +15,6 @@ async function getFeaturedReviews() {
 }
 
 export default async function HomePage() {
-  const featuredReviews = await getFeaturedReviews()
-  return <HomePageContent featuredReviews={featuredReviews} />
+  const [featuredReviews, websiteContent] = await Promise.all([getFeaturedReviews(), getWebsiteContent()])
+  return <HomePageContent featuredReviews={featuredReviews} websiteContent={websiteContent} />
 }

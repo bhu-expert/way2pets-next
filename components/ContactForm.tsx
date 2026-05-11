@@ -3,7 +3,12 @@
 import { useState } from 'react'
 import { useI18n } from '@/src/i18n'
 
-export default function ContactForm() {
+export type ContactFormCmsContent = {
+  submit?: string
+  topics?: { boarding?: string; product?: string; grooming?: string; other?: string }
+}
+
+export default function ContactForm({ content }: { content?: ContactFormCmsContent }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const { t } = useI18n()
@@ -51,17 +56,17 @@ export default function ContactForm() {
       <div className="form-group">
         <select name="contactTopic" className="form-select" defaultValue="">
           <option value="" disabled>{t.contactForm.topic}</option>
-          <option>{t.contactForm.topics.boarding}</option>
-          <option>{t.contactForm.topics.product}</option>
-          <option>{t.contactForm.topics.grooming}</option>
-          <option>{t.contactForm.topics.other}</option>
+          <option>{content?.topics?.boarding || t.contactForm.topics.boarding}</option>
+          <option>{content?.topics?.product || t.contactForm.topics.product}</option>
+          <option>{content?.topics?.grooming || t.contactForm.topics.grooming}</option>
+          <option>{content?.topics?.other || t.contactForm.topics.other}</option>
         </select>
       </div>
       <div className="form-group">
         <textarea name="contactMessage" className="form-input" rows={5} placeholder={t.contactForm.message} />
       </div>
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={status === 'loading'}>
-        {status === 'loading' ? t.contactForm.sending : t.contactForm.submit}
+        {status === 'loading' ? t.contactForm.sending : (content?.submit || t.contactForm.submit)}
       </button>
       {status === 'success' && (
         <p className="form-message success">{t.contactForm.success}</p>

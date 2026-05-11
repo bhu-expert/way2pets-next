@@ -56,7 +56,7 @@ export function getMissingCloudinaryEnv(env: NodeJS.ProcessEnv = process.env) {
 
 export function normalizeGalleryForm(formData: FormData) {
   const rawCategory = textFromForm(formData, 'category') || 'gallery'
-  const category = [...galleryCategories, 'gallery', 'pets'].includes(rawCategory) ? rawCategory : 'gallery'
+  const category = [...galleryCategories, 'gallery', 'pets', 'website'].includes(rawCategory) ? rawCategory : 'gallery'
   const subcategory = textFromForm(formData, 'subcategory')
   const sortOrder = Number(textFromForm(formData, 'sortOrder', 'sort_order') || 0)
   return {

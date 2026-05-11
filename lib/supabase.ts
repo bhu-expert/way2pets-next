@@ -93,6 +93,15 @@ export async function updateRows<T>(tableWithFilter: string, body: Json, service
   })
 }
 
+export async function upsertRows<T>(tableWithQuery: string, body: Json, serviceRole = true) {
+  return supabaseRest<T[]>(tableWithQuery, {
+    method: 'POST',
+    serviceRole,
+    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify(body),
+  })
+}
+
 export async function getRows<T>(tableWithQuery: string, serviceRole = false, accessToken?: string) {
   return supabaseRest<T[]>(tableWithQuery, { serviceRole, accessToken })
 }
