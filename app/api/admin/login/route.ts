@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { adminCookieName } from '@/lib/admin'
-import { isAllowedAdmin, signInWithPassword } from '@/lib/supabase'
+import { clearAdminSessionCookies, setAdminSessionCookies } from '@/lib/admin'
+import { isAllowedAdmin, signInWithPassword, signOutAuthSession } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
@@ -13,17 +13,14 @@ export async function POST(req: NextRequest) {
     const session = await signInWithPassword(email, password)
 
     if (!isAllowedAdmin(session.user.email)) {
-      return NextResponse.json({ success: false, message: 'This user is not allowed to access admin.' }, { status: 403 })
+      await signOutAuthSession(session.access_token)
+      const res = NextResponse.json({ success: false, message: 'This user is not allowed to access admin.' }, { status: 403 })
+      clearAdminSessionCookies(res.cookies)
+      return res
     }
 
     const res = NextResponse.json({ success: true })
-    res.cookies.set(adminCookieName, session.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 8,
-    })
+    setAdminSessionCookies(res.cookies, session)
     return res
   } catch (error) {
     console.error('Admin login failed:', error)
