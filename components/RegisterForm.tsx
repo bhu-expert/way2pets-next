@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useI18n } from '@/src/i18n'
 
 export default function RegisterForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const { t } = useI18n()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -38,7 +40,7 @@ export default function RegisterForm() {
         setStatus('error')
       }
     } catch {
-      setErrorMsg('Something went wrong. Please try again later.')
+      setErrorMsg(t.registerForm.genericError)
       setStatus('error')
     }
   }
@@ -46,59 +48,59 @@ export default function RegisterForm() {
   return (
     <form onSubmit={handleSubmit}>
       <h3 style={{ marginBottom: '20px', color: 'var(--primary-green)', borderBottom: '2px solid var(--accent-orange)', display: 'inline-block' }}>
-        Owner Details
+        {t.registerForm.ownerDetails}
       </h3>
       <div className="form-group">
-        <label htmlFor="ownerName">Owner Name</label>
-        <input type="text" id="ownerName" name="ownerName" className="form-input" placeholder="Your Full Name" required />
+        <label htmlFor="ownerName">{t.registerForm.ownerName}</label>
+        <input type="text" id="ownerName" name="ownerName" className="form-input" placeholder={t.registerForm.fullName} required />
       </div>
       <div className="form-group">
-        <label htmlFor="phone">Phone Number</label>
-        <input type="tel" id="phone" name="phone" className="form-input" placeholder="Contact Number" required />
+        <label htmlFor="phone">{t.registerForm.phone}</label>
+        <input type="tel" id="phone" name="phone" className="form-input" placeholder={t.registerForm.contactNumber} required />
       </div>
       <div className="form-group">
-        <label htmlFor="email">Email Address</label>
-        <input type="email" id="email" name="email" className="form-input" placeholder="Your Email" required />
+        <label htmlFor="email">{t.registerForm.email}</label>
+        <input type="email" id="email" name="email" className="form-input" placeholder={t.registerForm.emailPlaceholder} required />
       </div>
       <div className="form-group">
-        <label htmlFor="address">Address</label>
-        <textarea id="address" name="address" className="form-input" rows={2} placeholder="Your Address" />
+        <label htmlFor="address">{t.registerForm.address}</label>
+        <textarea id="address" name="address" className="form-input" rows={2} placeholder={t.registerForm.addressPlaceholder} />
       </div>
 
       <h3 style={{ margin: '30px 0 20px', color: 'var(--primary-green)', borderBottom: '2px solid var(--accent-orange)', display: 'inline-block' }}>
-        Pet Details
+        {t.registerForm.petDetails}
       </h3>
       <div className="form-group">
-        <label htmlFor="petName">Pet&apos;s Name</label>
-        <input type="text" id="petName" name="petName" className="form-input" placeholder="Pet's Name" required />
+        <label htmlFor="petName">{t.registerForm.petName}</label>
+        <input type="text" id="petName" name="petName" className="form-input" placeholder={t.registerForm.petName} required />
       </div>
       <div className="form-group">
-        <label htmlFor="petType">Pet Type</label>
+        <label htmlFor="petType">{t.registerForm.petType}</label>
         <select id="petType" name="petType" className="form-select">
-          <option value="dog">Dog</option>
-          <option value="cat">Cat</option>
-          <option value="bird">Bird</option>
-          <option value="other">Other</option>
+          <option value="dog">{t.registerForm.dog}</option>
+          <option value="cat">{t.registerForm.cat}</option>
+          <option value="bird">{t.registerForm.bird}</option>
+          <option value="other">{t.registerForm.other}</option>
         </select>
       </div>
       <div className="form-group">
-        <label htmlFor="breed">Breed</label>
-        <input type="text" id="breed" name="breed" className="form-input" placeholder="e.g. Labrador, Persian Cat" />
+        <label htmlFor="breed">{t.registerForm.breed}</label>
+        <input type="text" id="breed" name="breed" className="form-input" placeholder={t.registerForm.breedPlaceholder} />
       </div>
       <div className="form-group">
-        <label htmlFor="dob">Date of Birth / Age</label>
-        <input type="text" id="dob" name="dob" className="form-input" placeholder="e.g. 2 years old" />
+        <label htmlFor="dob">{t.registerForm.dob}</label>
+        <input type="text" id="dob" name="dob" className="form-input" placeholder={t.registerForm.dobPlaceholder} />
       </div>
       <div className="form-group">
-        <label htmlFor="medical">Medical History / Allergies (if any)</label>
-        <textarea id="medical" name="medical" className="form-input" rows={3} placeholder="Any specific needs or medical conditions?" />
+        <label htmlFor="medical">{t.registerForm.medical}</label>
+        <textarea id="medical" name="medical" className="form-input" rows={3} placeholder={t.registerForm.medicalPlaceholder} />
       </div>
 
       <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '20px' }} disabled={status === 'loading'}>
-        {status === 'loading' ? 'Registering...' : 'Register Now'}
+        {status === 'loading' ? t.registerForm.registering : t.registerForm.submit}
       </button>
       {status === 'success' && (
-        <p className="form-message success">Registration successful! Please check your email for confirmation.</p>
+        <p className="form-message success">{t.registerForm.success}</p>
       )}
       {status === 'error' && (
         <p className="form-message error">{errorMsg}</p>

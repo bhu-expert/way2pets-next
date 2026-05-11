@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useI18n } from '@/src/i18n'
 
 export default function BoardingForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const { t } = useI18n()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -46,7 +48,7 @@ export default function BoardingForm() {
         setStatus('error')
       }
     } catch {
-      setErrorMsg('Something went wrong. Please try again later.')
+      setErrorMsg(t.boardingForm.genericError)
       setStatus('error')
     }
   }
@@ -54,73 +56,73 @@ export default function BoardingForm() {
   return (
     <form onSubmit={handleSubmit}>
       <div className="form-group">
-        <label>Owner Name</label>
-        <input type="text" name="boardingOwnerName" className="form-input" placeholder="Your full name" required />
+        <label>{t.boardingForm.ownerName}</label>
+        <input type="text" name="boardingOwnerName" className="form-input" placeholder={t.boardingForm.ownerNamePlaceholder} required />
       </div>
       <div className="form-group">
-        <label>Pet Type</label>
-        <select name="boardingPetType" className="form-select"><option value="dog">Dog</option><option value="cat">Cat</option></select>
+        <label>{t.boardingForm.petType}</label>
+        <select name="boardingPetType" className="form-select"><option value="dog">{t.boardingForm.dog}</option><option value="cat">{t.boardingForm.cat}</option></select>
       </div>
       <div className="form-group">
-        <label>Pet Name</label>
-        <input type="text" name="boardingPetName" className="form-input" placeholder="e.g. Bruno" required />
+        <label>{t.boardingForm.petName}</label>
+        <input type="text" name="boardingPetName" className="form-input" placeholder={t.boardingForm.petNamePlaceholder} required />
       </div>
       <div className="form-group">
-        <label>Breed</label>
-        <input type="text" name="boardingBreed" className="form-input" placeholder="e.g. Labrador, Persian Cat" />
+        <label>{t.boardingForm.breed}</label>
+        <input type="text" name="boardingBreed" className="form-input" placeholder={t.boardingForm.breedPlaceholder} />
       </div>
       <div className="form-group">
-        <label>Dates</label>
+        <label>{t.boardingForm.dates}</label>
         <div style={{ display: 'flex', gap: '10px' }}>
           <input type="date" name="boardingCheckIn" className="form-input" required />
           <input type="date" name="boardingCheckOut" className="form-input" required />
         </div>
       </div>
       <div className="form-group">
-        <label>Food Preference</label>
+        <label>{t.boardingForm.foodPreference}</label>
         <select name="boardingFood" className="form-select">
-          <option>Natural Food (Served by Us)</option>
-          <option>Kibble (Provided by Owner)</option>
-          <option>Special Diet</option>
+          <option>{t.boardingForm.naturalFood}</option>
+          <option>{t.boardingForm.kibble}</option>
+          <option>{t.boardingForm.specialDiet}</option>
         </select>
       </div>
       <div className="form-group">
-        <label>Any Medical Issues?</label>
+        <label>{t.boardingForm.medical}</label>
         <textarea name="boardingMedical" className="form-input" rows={2} />
       </div>
       <div className="form-group">
-        <label>Vaccination Status</label>
-        <select name="boardingVaccination" className="form-select"><option>Complete</option><option>Partial</option><option>Not sure</option></select>
+        <label>{t.boardingForm.vaccination}</label>
+        <select name="boardingVaccination" className="form-select"><option>{t.boardingForm.complete}</option><option>{t.boardingForm.partial}</option><option>{t.boardingForm.notSure}</option></select>
       </div>
       <div className="form-group">
-        <label>Aggression Status</label>
-        <select name="boardingAggression" className="form-select"><option>None</option><option>Mild</option><option>Moderate</option><option>High</option></select>
+        <label>{t.boardingForm.aggression}</label>
+        <select name="boardingAggression" className="form-select"><option>{t.boardingForm.none}</option><option>{t.boardingForm.mild}</option><option>{t.boardingForm.moderate}</option><option>{t.boardingForm.high}</option></select>
       </div>
       <div className="form-group">
-        <label><input type="checkbox" name="boardingPackagedFood" /> Packaged food by owner</label>
-        <label><input type="checkbox" name="boardingFreshFood" defaultChecked /> Fresh cooked food by Way2Pets</label>
+        <label><input type="checkbox" name="boardingPackagedFood" /> {t.boardingForm.packagedFood}</label>
+        <label><input type="checkbox" name="boardingFreshFood" defaultChecked /> {t.boardingForm.freshFood}</label>
       </div>
       <div className="form-group">
-        <label>Special Instructions</label>
+        <label>{t.boardingForm.instructions}</label>
         <textarea name="boardingInstructions" className="form-input" rows={2} />
       </div>
       <div className="form-group">
-        <label>Your Mobile</label>
+        <label>{t.boardingForm.mobile}</label>
         <input type="tel" name="boardingContact" className="form-input" placeholder="+91..." required />
       </div>
       <div className="form-group">
-        <label>WhatsApp Number</label>
+        <label>{t.boardingForm.whatsapp}</label>
         <input type="tel" name="boardingWhatsApp" className="form-input" placeholder="+91..." />
       </div>
       <div className="form-group">
-        <label>City</label>
+        <label>{t.boardingForm.city}</label>
         <input type="text" name="boardingCity" className="form-input" placeholder="Lucknow" />
       </div>
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={status === 'loading'}>
-        {status === 'loading' ? 'Submitting...' : 'Request Booking'}
+        {status === 'loading' ? t.boardingForm.submitting : t.boardingForm.submit}
       </button>
       {status === 'success' && (
-        <p className="form-message success">Booking request sent! We will contact you soon to confirm.</p>
+        <p className="form-message success">{t.boardingForm.success}</p>
       )}
       {status === 'error' && (
         <p className="form-message error">{errorMsg}</p>

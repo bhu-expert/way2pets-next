@@ -1,7 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import BoardingForm from '@/components/BoardingForm'
 import { JsonLd, faqSchema, localBusinessSchema } from '@/lib/seo'
 import { siteConfig } from '@/lib/site'
+import { useI18n } from '@/src/i18n'
 
 export interface LandingPageContent {
   h1: string
@@ -13,23 +16,13 @@ export interface LandingPageContent {
   schemaType?: string
 }
 
-const defaultFaqs = [
-  {
-    question: 'Does Way2Pets provide dog and cat boarding in Lucknow?',
-    answer: 'Yes. Way2Pets provides home-style dog and cat boarding support in Lucknow with experienced handlers, hygiene, daily care and owner updates.',
-  },
-  {
-    question: 'Where is Way2Pets located?',
-    answer: `Way2Pets is based in Gomti Nagar, Lucknow at ${siteConfig.shortAddress}.`,
-  },
-  {
-    question: 'How can I book a service?',
-    answer: 'You can call, WhatsApp, submit the boarding form or send a contact enquiry. The team will confirm availability and next steps.',
-  },
-]
-
 export default function SeoLandingPage({ content }: { content: LandingPageContent }) {
-  const faqs = content.faqs || defaultFaqs
+  const { language, t } = useI18n()
+  const localizedContent = language === 'hi' && content.path === '/pet-boarding-for-cat-and-dog-in-lucknow' ? t.seoLanding.boardingPage : content
+  const faqs = content.faqs || t.seoLanding.defaultFaqs.map((faq, index) => ({
+    ...faq,
+    answer: index === 1 ? `${faq.answer} ${siteConfig.shortAddress}.` : faq.answer,
+  }))
 
   return (
     <>
@@ -37,22 +30,22 @@ export default function SeoLandingPage({ content }: { content: LandingPageConten
       <JsonLd data={faqSchema(faqs)} />
       <section className="seo-hero">
         <div>
-          <p className="eyebrow">Way2Pets Gomti Nagar, Lucknow</p>
-          <h1>{content.h1}</h1>
-          <p>{content.intro}</p>
+          <p className="eyebrow">{t.seoLanding.eyebrow}</p>
+          <h1>{localizedContent.h1}</h1>
+          <p>{localizedContent.intro}</p>
           <div className="seo-cta-row">
-            <a className="btn btn-primary" href={`https://wa.me/${siteConfig.whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp Now</a>
-            <a className="btn btn-secondary" href={`tel:${siteConfig.phone.replace(/\s/g, '')}`}>Call Now</a>
+            <a className="btn btn-primary" href={`https://wa.me/${siteConfig.whatsapp}`} target="_blank" rel="noopener noreferrer">{t.common.whatsapp}</a>
+            <a className="btn btn-secondary" href={`tel:${siteConfig.phone.replace(/\s/g, '')}`}>{t.common.callNow}</a>
           </div>
         </div>
       </section>
 
       <section className="services">
-        <h2>Why pet parents trust Way2Pets</h2>
+        <h2>{t.seoLanding.whyTrust}</h2>
         <div className="services-grid">
-          {content.serviceDetails.map((detail) => (
+          {localizedContent.serviceDetails.map((detail) => (
             <article className="service-card text-card" key={detail}>
-              <div className="service-content"><h3>{detail}</h3><p>Local Lucknow pet care focused on safety, comfort, hygiene and practical guidance for dog and cat families.</p></div>
+              <div className="service-content"><h3>{detail}</h3><p>{t.seoLanding.cardText}</p></div>
             </article>
           ))}
         </div>
@@ -61,26 +54,26 @@ export default function SeoLandingPage({ content }: { content: LandingPageConten
       <section className="contact-section">
         <div className="contact-container">
           <div className="contact-info">
-            <h3>Book or enquire today</h3>
+            <h3>{t.seoLanding.bookEnquire}</h3>
             <p>{siteConfig.shortAddress}</p>
             <p>{siteConfig.phone}</p>
             <p>{siteConfig.hours}</p>
             <div className="seo-internal-links">
-              <Link href="/dog-boarding-in-lucknow">Dog Boarding</Link>
-              <Link href="/cat-boarding-in-lucknow">Cat Boarding</Link>
-              <Link href="/gallery">Gallery</Link>
-              <Link href="/reviews">Reviews</Link>
+              <Link href="/dog-boarding-in-lucknow">{t.seoLanding.dogBoarding}</Link>
+              <Link href="/cat-boarding-in-lucknow">{t.seoLanding.catBoarding}</Link>
+              <Link href="/gallery">{t.common.gallery}</Link>
+              <Link href="/reviews">{t.common.reviews}</Link>
             </div>
           </div>
           <div className="contact-form-wrapper">
-            <h3>{content.ctaLabel || 'Request Boarding'}</h3>
+            <h3>{content.ctaLabel || t.seoLanding.requestBoarding}</h3>
             <BoardingForm />
           </div>
         </div>
       </section>
 
       <section className="reviews">
-        <h2>FAQs</h2>
+        <h2>{t.common.faqs}</h2>
         <div className="reviews-grid">
           {faqs.map((faq) => (
             <article className="review-card" key={faq.question}>

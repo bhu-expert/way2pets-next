@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Hero from '@/components/Hero'
+import ReviewsPageContent from '@/components/ReviewsPageContent'
 import { getRows } from '@/lib/supabase'
 
 export const metadata: Metadata = {
@@ -24,20 +24,5 @@ async function getReviews() {
 
 export default async function ReviewsPage() {
   const reviews = await getReviews()
-  return (
-    <>
-      <Hero title="Customer Love" subtitle="Don't just take our word for it. Here is what pet parents in Lucknow have to say." imageUrl="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" minHeight="40vh" />
-      <section className="reviews" style={{ background: 'var(--light-green)' }}>
-        <div className="reviews-grid">
-          {reviews.map((r, index) => (
-            <div key={r.id || r.reviewer_name || index} className="review-card">
-              <div className="stars">{'★'.repeat(r.rating || 5)}</div>
-              <p>&ldquo;{r.review_text}&rdquo;</p>
-              <div className="reviewer">- <strong>{r.reviewer_name}</strong><br /><small>{r.source || r.reviewed_at || 'Way2Pets customer'}</small></div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  )
+  return <ReviewsPageContent reviews={reviews} />
 }
