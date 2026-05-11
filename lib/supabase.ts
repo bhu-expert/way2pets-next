@@ -1,5 +1,14 @@
 type Json = Record<string, unknown> | Record<string, unknown>[]
 
+export type AuthUser = { id: string; email?: string }
+export type AuthSession = {
+  access_token: string
+  refresh_token: string
+  expires_in?: number
+  expires_at?: number
+  user: AuthUser
+}
+
 export class SupabaseRestError extends Error {
   table: string
   status: number
@@ -95,13 +104,40 @@ export async function signInWithPassword(email: string, password: string) {
     method: 'POST',
     headers: headers(false),
     body: JSON.stringify({ email, password }),
+    cache: 'no-store',
   })
 
   if (!res.ok) {
     throw new Error('Invalid admin login.')
   }
 
-  return (await res.json()) as { access_token: string; refresh_token: string; user: { email?: string } }
+  return (await res.json()) as AuthSession
+}
+
+export async function refreshAuthSession(refreshToken?: string) {
+  if (!refreshToken || !hasSupabaseConfig(false)) return null
+
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST',
+    headers: headers(false),
+    body: JSON.stringify({ refresh_token: refreshToken }),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return null
+  return (await res.json()) as AuthSession
+}
+
+export async function signOutAuthSession(accessToken?: string) {
+  if (!accessToken || !hasSupabaseConfig(false)) return
+
+  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+    method: 'POST',
+    headers: headers(false, accessToken),
+    cache: 'no-store',
+  }).catch((error) => {
+    console.error('Supabase sign out failed:', error)
+  })
 }
 
 export async function getAuthUser(accessToken?: string) {
@@ -113,11 +149,13 @@ export async function getAuthUser(accessToken?: string) {
   })
 
   if (!res.ok) return null
-  return (await res.json()) as { id: string; email?: string }
+  return (await res.json()) as AuthUser
 }
 
 export function isAllowedAdmin(email?: string | null) {
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (!adminEmail) return Boolean(email)
-  return email?.toLowerCase() === adminEmail.toLowerCase()
+  const normalizedEmail = email?.trim().toLowerCase()
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase()
+
+  if (!normalizedEmail || !adminEmail) return false
+  return normalizedEmail === adminEmail
 }
