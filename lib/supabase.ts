@@ -1,5 +1,27 @@
 type Json = Record<string, unknown> | Record<string, unknown>[]
 
+export class SupabaseRestError extends Error {
+  table: string
+  status: number
+  body: string
+  code?: string
+  details?: string
+  hint?: string
+
+  constructor(table: string, status: number, body: string) {
+    let parsed: { message?: string; code?: string; details?: string; hint?: string } = {}
+    try { parsed = JSON.parse(body) } catch {}
+    super(parsed.message || `Supabase ${table} request failed: ${status} ${body}`)
+    this.name = 'SupabaseRestError'
+    this.table = table
+    this.status = status
+    this.body = body
+    this.code = parsed.code
+    this.details = parsed.details
+    this.hint = parsed.hint
+  }
+}
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -39,7 +61,7 @@ export async function supabaseRest<T>(
 
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(`Supabase ${table} request failed: ${res.status} ${text}`)
+    throw new SupabaseRestError(table, res.status, text)
   }
 
   if (res.status === 204) return null

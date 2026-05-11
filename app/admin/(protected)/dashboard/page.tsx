@@ -57,6 +57,19 @@ export default async function AdminDashboardPage() {
           <Link className="admin-stat" key={label} href={String(href)}><span>{label}</span><strong>{value}</strong></Link>
         ))}
       </div>
+      <div className="admin-panel">
+        <h2>Quick actions</h2>
+        <div className="admin-actions-row">
+          <Link className="admin-button" href="/admin/blog/new">Add Blog</Link>
+          <Link className="admin-button" href="/admin/pets/new">Add Pet</Link>
+          <Link className="admin-button" href="/admin/gallery?new=1">Add Gallery Image</Link>
+          <Link className="admin-button" href="/admin/reviews?new=1">Add Review</Link>
+          <Link className="admin-button" href="/admin/pages?new=home">Edit Home Page</Link>
+          <Link className="admin-button" href="/admin/pages?new=boarding">Edit Boarding Page</Link>
+          <Link className="admin-button" href="/admin/leads">View Leads</Link>
+          <Link className="admin-button" href="/admin/bookings">View Bookings</Link>
+        </div>
+      </div>
       <div className="admin-grid-two">
         <RecentPanel title="Recent contact leads" rows={recentLeads} href="/admin/leads" fields={['name', 'mobile', 'topic', 'lead_status', 'created_at']} />
         <RecentPanel title="Recent boarding bookings" rows={recentBookings} href="/admin/bookings" fields={['owner_name', 'pet_type', 'pet_name', 'check_in_date', 'booking_status', 'payment_status']} />
