@@ -132,3 +132,31 @@ export async function bulkImportReviews(rows: Array<Record<string, string>>) {
   revalidatePath('/reviews')
   return { imported: valid.length, failed: errors.length, errors }
 }
+
+export async function saveWebsiteContent(formData: FormData) {
+  await requireAdmin()
+  const { upsertRows } = await import('./supabase')
+  const rawSections = String(formData.get('sections') || '[]')
+  const rawItems = String(formData.get('items') || '[]')
+  const sections = JSON.parse(rawSections) as Record<string, unknown>[]
+  const items = JSON.parse(rawItems) as Record<string, unknown>[]
+  if (!Array.isArray(sections) || !Array.isArray(items)) throw new Error('Invalid website content payload.')
+
+  const normalize = (row: Record<string, unknown>) => ({
+    ...row,
+    section_key: String(row.section_key || '').trim(),
+    sort_order: Number(row.sort_order || 0),
+    is_active: row.is_active !== false,
+    metadata_json: row.metadata_json && typeof row.metadata_json === 'object' ? row.metadata_json : {},
+  })
+  const cleanSections = sections.map(normalize).filter((row) => row.section_key)
+  const cleanItems = items.map((row) => ({ ...normalize(row), item_key: String(row.item_key || '').trim() })).filter((row) => row.section_key && row.item_key)
+
+  if (cleanSections.length) await upsertRows('website_sections?on_conflict=section_key', cleanSections)
+  if (cleanItems.length) await upsertRows('website_section_items?on_conflict=section_key,item_key', cleanItems)
+
+  revalidatePath('/')
+  revalidatePath('/admin/website-content')
+  revalidatePath('/admin')
+  redirect('/admin/website-content?saved=1')
+}

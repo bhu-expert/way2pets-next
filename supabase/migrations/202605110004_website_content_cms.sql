@@ -1,70 +1,72 @@
--- Way2Pets CMS seed data. Safe to run multiple times.
+-- Adds editable public website content tables and seeds current homepage/footer CTA content.
 
-insert into public.blog_categories (name, slug, pet_type, description, status)
-values
-  ('Dog Boarding', 'boarding', 'dog', 'Dog boarding articles and Lucknow boarding guides.', 'published'),
-  ('Dog Breeds', 'breeds', 'dog', 'Dog breed guides for Indian families.', 'published'),
-  ('Dog Health', 'health', 'dog', 'Dog health and wellness articles.', 'published'),
-  ('Dog Grooming', 'grooming', 'dog', 'Dog grooming guides.', 'published'),
-  ('Dog Behaviour Training', 'behaviour-training', 'dog', 'Dog behaviour and training guides.', 'published'),
-  ('Puppies', 'puppies', 'dog', 'Puppy buying and care guides.', 'published'),
-  ('Cat Boarding', 'cat-boarding', 'cat', 'Cat boarding articles and Lucknow boarding guides.', 'published'),
-  ('Cat Breeds', 'cat-breeds', 'cat', 'Cat breed guides.', 'published'),
-  ('Cat Health', 'cat-health', 'cat', 'Cat health and wellness articles.', 'published'),
-  ('Cat Grooming', 'cat-grooming', 'cat', 'Cat grooming guides.', 'published'),
-  ('Cat Behaviour Training', 'cat-behaviour-training', 'cat', 'Cat behaviour and training guides.', 'published'),
-  ('Kittens', 'kittens', 'cat', 'Kitten care guides.', 'published'),
-  ('Pet Care', 'pet-care', 'general', 'General pet care articles.', 'published'),
-  ('Adoption', 'adoption', 'general', 'Adoption guides.', 'published'),
-  ('Buying Guide', 'buying-guide', 'general', 'Pet buying guides.', 'published'),
-  ('Lucknow Pet Services', 'lucknow-pet-services', 'general', 'Local pet service guides.', 'published')
-on conflict (slug) do update set name = excluded.name, pet_type = excluded.pet_type, description = excluded.description, status = excluded.status;
+create table if not exists public.website_sections (
+  id uuid primary key default gen_random_uuid(),
+  section_key text not null unique,
+  title_en text,
+  title_hi text,
+  subtitle_en text,
+  subtitle_hi text,
+  description_en text,
+  description_hi text,
+  image_url text,
+  button_text_en text,
+  button_text_hi text,
+  button_link text,
+  is_active boolean not null default true,
+  sort_order int not null default 0,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 
-insert into public.site_settings (key, value_json, group_name)
-values
-  ('site_name', '{"value":"Way2Pets"}', 'general'),
-  ('primary_phone', '{"value":"+91 94150 77162"}', 'contact'),
-  ('whatsapp_number', '{"value":"+91 94150 77162"}', 'contact'),
-  ('email', '{"value":"way2pets.com@gmail.com"}', 'contact'),
-  ('notification_email', '{"value":"way2pets.com@gmail.com"}', 'notifications'),
-  ('address', '{"value":"Lucknow, Uttar Pradesh"}', 'contact'),
-  ('default_seo_title', '{"value":"Way2Pets Lucknow"}', 'seo'),
-  ('default_seo_description', '{"value":"Dog and cat boarding, grooming, pet shop, puppies and kittens in Lucknow."}', 'seo')
-on conflict (key) do update set value_json = excluded.value_json, group_name = excluded.group_name;
+create table if not exists public.website_section_items (
+  id uuid primary key default gen_random_uuid(),
+  section_key text not null,
+  item_key text not null,
+  title_en text,
+  title_hi text,
+  subtitle_en text,
+  subtitle_hi text,
+  description_en text,
+  description_hi text,
+  image_url text,
+  icon_key text,
+  button_text_en text,
+  button_text_hi text,
+  button_link text,
+  is_active boolean not null default true,
+  sort_order int not null default 0,
+  metadata_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint website_section_items_unique_key unique (section_key, item_key)
+);
 
-insert into public.pages (title, slug, route_path, page_type, status, hero_title, hero_subtitle, content_json, published_at)
-values
-  ('Home', 'home', '/', 'home', 'published', 'Way2Pets', 'Pet boarding, grooming, pet shop and pet care in Lucknow.', '{}', now()),
-  ('Contact', 'contact', '/contact', 'page', 'published', 'Contact Way2Pets', 'Talk to us for boarding, grooming, puppies, kittens and pet care.', '{}', now()),
-  ('Pet Boarding for Cats and Dogs in Lucknow', 'pet-boarding-for-cat-and-dog-in-lucknow', '/pet-boarding-for-cat-and-dog-in-lucknow', 'service', 'published', 'Pet Boarding for Cats and Dogs in Lucknow', 'Safe, homely boarding for dogs and cats.', '{}', now()),
-  ('Dog Boarding in Lucknow', 'dog-boarding-in-lucknow', '/dog-boarding-in-lucknow', 'service', 'published', 'Dog Boarding in Lucknow', 'Trusted dog boarding with experienced handlers.', '{}', now()),
-  ('Cat Boarding in Lucknow', 'cat-boarding-in-lucknow', '/cat-boarding-in-lucknow', 'service', 'published', 'Cat Boarding in Lucknow', 'Calm cat boarding and care in Lucknow.', '{}', now()),
-  ('Pet Shop in Lucknow', 'pet-shop-in-lucknow', '/pet-shop-in-lucknow', 'service', 'published', 'Pet Shop in Lucknow', 'Pet supplies, guidance and care support.', '{}', now()),
-  ('Pet Store in Lucknow', 'pet-store-in-lucknow', '/pet-store-in-lucknow', 'service', 'published', 'Pet Store in Lucknow', 'Quality pet products and support.', '{}', now()),
-  ('Dog Grooming in Lucknow', 'dog-grooming-in-lucknow', '/dog-grooming-in-lucknow', 'service', 'published', 'Dog Grooming in Lucknow', 'Grooming for clean, comfortable dogs.', '{}', now()),
-  ('Cat Grooming in Lucknow', 'cat-grooming-in-lucknow', '/cat-grooming-in-lucknow', 'service', 'published', 'Cat Grooming in Lucknow', 'Gentle grooming for cats.', '{}', now()),
-  ('Puppy for Sale in Lucknow', 'puppy-for-sale-in-lucknow', '/puppy-for-sale-in-lucknow', 'service', 'published', 'Puppy for Sale in Lucknow', 'Healthy puppies with care guidance.', '{}', now()),
-  ('Kitten for Sale in Lucknow', 'kitten-for-sale-in-lucknow', '/kitten-for-sale-in-lucknow', 'service', 'published', 'Kitten for Sale in Lucknow', 'Healthy kittens with care guidance.', '{}', now()),
-  ('Gallery', 'gallery', '/gallery', 'page', 'published', 'Way2Pets Gallery', 'Photos from Way2Pets.', '{}', now()),
-  ('Reviews', 'reviews', '/reviews', 'page', 'published', 'Customer Reviews', 'What pet parents say about Way2Pets.', '{}', now()),
-  ('Register Pet', 'register', '/register', 'page', 'published', 'Register Your Pet', 'Register for boarding, grooming, adoption or sale enquiries.', '{}', now()),
-  ('Find a Pet', 'find-a-pet', '/find-a-pet', 'page', 'published', 'Find Your Best Friend', 'Discover pets waiting to join your family.', '{}', now())
-on conflict (route_path) do update set title = excluded.title, slug = excluded.slug, page_type = excluded.page_type, status = excluded.status, hero_title = excluded.hero_title, hero_subtitle = excluded.hero_subtitle;
+create index if not exists website_sections_active_order_idx on public.website_sections (is_active, sort_order);
+create index if not exists website_section_items_section_active_order_idx on public.website_section_items (section_key, is_active, sort_order);
 
-insert into public.redirects (source_path, destination_path, status_code, is_active)
-values
-  ('/boarding', '/pet-boarding-for-cat-and-dog-in-lucknow', 301, true),
-  ('/pet-dog-cat-boarding-lucknow', '/pet-boarding-for-cat-and-dog-in-lucknow', 301, true),
-  ('/contactus', '/contact', 301, true),
-  ('/lucknow-dog-boarding.html', '/dog-boarding-in-lucknow', 301, true),
-  ('/dog-boarding-lucknow', '/dog-boarding-in-lucknow', 301, true),
-  ('/cat-boarding-lucknow', '/cat-boarding-in-lucknow', 301, true),
-  ('/pet-shop-lucknow', '/pet-shop-in-lucknow', 301, true),
-  ('/pet-store-lucknow', '/pet-store-in-lucknow', 301, true)
-on conflict (source_path) do update set destination_path = excluded.destination_path, status_code = excluded.status_code, is_active = excluded.is_active;
+drop trigger if exists set_website_sections_updated_at on public.website_sections;
+create trigger set_website_sections_updated_at before update on public.website_sections for each row execute function public.set_updated_at();
 
+drop trigger if exists set_website_section_items_updated_at on public.website_section_items;
+create trigger set_website_section_items_updated_at before update on public.website_section_items for each row execute function public.set_updated_at();
 
--- Seed editable public website content.
+alter table public.website_sections enable row level security;
+alter table public.website_section_items enable row level security;
+
+drop policy if exists "public read active website sections" on public.website_sections;
+create policy "public read active website sections" on public.website_sections for select using (is_active = true);
+
+drop policy if exists "public read active website section items" on public.website_section_items;
+create policy "public read active website section items" on public.website_section_items for select using (is_active = true);
+
+drop policy if exists "authenticated manage website sections" on public.website_sections;
+create policy "authenticated manage website sections" on public.website_sections for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+
+drop policy if exists "authenticated manage website section items" on public.website_section_items;
+create policy "authenticated manage website section items" on public.website_section_items for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+
 insert into public.website_sections (section_key,title_en,title_hi,subtitle_en,subtitle_hi,description_en,description_hi,image_url,button_text_en,button_text_hi,button_link,is_active,sort_order,metadata_json)
 values
 ('hero','Lucknow''s Natural Pet Care Experts','लखनऊ के नेचुरल पेट केयर एक्सपर्ट्स','Natural food. Cage-free boarding. Ethical adoption. Because your pet deserves the best.','नेचुरल फूड, केज-फ्री बोर्डिंग और सही पेट गाइडेंस — क्योंकि आपका पेट बेस्ट केयर deserve करता है।',null,null,'https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80','','','',true,10,'{}'),

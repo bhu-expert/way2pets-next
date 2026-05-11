@@ -3,6 +3,8 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import StickyCtas from '@/components/StickyCtas'
+import { WebsiteContentProvider } from '@/components/WebsiteContentProvider'
+import { getWebsiteContent } from '@/lib/website-content'
 import { LanguageProvider } from '@/src/i18n'
 
 
@@ -11,11 +13,12 @@ export const metadata: Metadata = {
   description: 'Way2Pets offers cage-free pet boarding, natural pet care, pet adoption guidance and expert dog and cat care in Lucknow.',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const websiteContent = await getWebsiteContent()
   return (
     <html lang="en">
       <head>
@@ -26,10 +29,12 @@ export default function RootLayout({
       </head>
       <body>
         <LanguageProvider>
-          <Navbar />
-          <main>{children}</main>
-          <StickyCtas />
-          <Footer />
+          <WebsiteContentProvider content={websiteContent}>
+            <Navbar />
+            <main>{children}</main>
+            <StickyCtas />
+            <Footer />
+          </WebsiteContentProvider>
         </LanguageProvider>
       </body>
     </html>

@@ -4,6 +4,7 @@ import { ReactNode } from 'react'
 const adminLinks = [
   ['/admin/dashboard', 'Dashboard'],
   ['/admin/pages', 'Pages'],
+  ['/admin/website-content', 'Website Content'],
   ['/admin/blog', 'Blog'],
   ['/admin/pets', 'Pets'],
   ['/admin/pet-registrations', 'Pet Registrations'],
