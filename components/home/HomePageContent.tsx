@@ -11,11 +11,7 @@ type Review = { id?: string; review_text: string; reviewer_name: string; rating?
 
 export default function HomePageContent({ featuredReviews }: { featuredReviews: Review[] }) {
   const { t } = useI18n()
-  const reviews = featuredReviews.length > 0 ? featuredReviews : [
-    { review_text: 'Best pet shop in Lucknow. I got a golden retriever puppy who is very healthy and lovely.', reviewer_name: 'Advocate Manvi Raj', rating: 5 },
-    { review_text: 'An amazing place like home for your dogs. I always fall back on Way2Pets if I ever need anything.', reviewer_name: 'Ramita', rating: 5 },
-    { review_text: 'Ashish is very nice. He has in-depth knowledge about dogs and takes care of your pets like his own.', reviewer_name: 'Varun Garg', rating: 5 },
-  ]
+  const reviews: Review[] = featuredReviews.length > 0 ? featuredReviews : t.home.fallbackReviews.map((review) => ({ ...review, rating: 5 }))
 
   return (
     <>

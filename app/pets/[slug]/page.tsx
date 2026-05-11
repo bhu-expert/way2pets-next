@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
-import ContactForm from '@/components/ContactForm'
+import PetDetailContent from '@/components/PetDetailContent'
 import { buildMetadata } from '@/lib/seo'
 import { getRows } from '@/lib/supabase'
 
@@ -52,25 +51,5 @@ export default async function PetPage({ params }: Props) {
   const pet = await getPet(slug)
   if (!pet) notFound()
 
-  return (
-    <section className="contact-section" style={{ paddingTop: '140px' }}>
-      <div className="contact-container">
-        <div className="contact-info">
-          <Image src={pet.media?.secure_url || '/logo.png'} alt={pet.media?.alt_text || pet.name || 'Way2Pets pet listing'} width={pet.media?.width || 480} height={pet.media?.height || 320} style={{ maxWidth: '100%', height: 'auto', borderRadius: 16 }} />
-          <h1>{pet.name}</h1>
-          <p>{pet.breed} · {pet.age} · {pet.gender}</p>
-          <p>Status: {pet.availability_status || 'available'}</p>
-          {pet.price ? <p>Price: ₹{pet.price}</p> : null}
-        </div>
-        <div className="contact-form-wrapper">
-          <h2>About {pet.name}</h2>
-          <p>{pet.description}</p>
-          <p><strong>Vaccination:</strong> {pet.vaccination_status || 'Ask Way2Pets'}</p>
-          <p><strong>Temperament:</strong> {pet.temperament || 'Ask Way2Pets'}</p>
-          <h3>Enquire about this pet</h3>
-          <ContactForm />
-        </div>
-      </div>
-    </section>
-  )
+  return <PetDetailContent pet={pet} />
 }

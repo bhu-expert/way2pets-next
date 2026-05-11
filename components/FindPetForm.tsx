@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useI18n } from '@/src/i18n'
 
 export default function FindPetForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const { t } = useI18n()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -31,7 +33,7 @@ export default function FindPetForm() {
         setStatus('error')
       }
     } catch {
-      setErrorMsg('Something went wrong. Please try again later.')
+      setErrorMsg(t.findPetForm.genericError)
       setStatus('error')
     }
   }
@@ -39,32 +41,32 @@ export default function FindPetForm() {
   return (
     <form onSubmit={handleSubmit}>
       <div className="form-group">
-        <label>I am looking for a:</label>
+        <label>{t.findPetForm.lookingFor}</label>
         <select name="findPetType" className="form-select">
-          <option>Puppy</option>
-          <option>Adult Dog</option>
-          <option>Kitten</option>
-          <option>Cat</option>
+          <option>{t.findPetForm.puppy}</option>
+          <option>{t.findPetForm.adultDog}</option>
+          <option>{t.findPetForm.kitten}</option>
+          <option>{t.findPetForm.cat}</option>
         </select>
       </div>
       <div className="form-group">
-        <label>Preferred Size/Breed:</label>
+        <label>{t.findPetForm.size}</label>
         <select name="findPetSize" className="form-select">
-          <option>Small (Apartment Friendly)</option>
-          <option>Medium (Active)</option>
-          <option>Large (Guard/Farm)</option>
-          <option>Indie / Desi (High Immunity)</option>
+          <option>{t.findPetForm.small}</option>
+          <option>{t.findPetForm.medium}</option>
+          <option>{t.findPetForm.large}</option>
+          <option>{t.findPetForm.indie}</option>
         </select>
       </div>
       <div className="form-group">
-        <label>Your Contact Number:</label>
+        <label>{t.findPetForm.contact}</label>
         <input type="text" name="findPetContact" className="form-input" placeholder="+91 99999 99999" required />
       </div>
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={status === 'loading'}>
-        {status === 'loading' ? 'Submitting...' : 'Show Me Pets'}
+        {status === 'loading' ? t.findPetForm.submitting : t.findPetForm.submit}
       </button>
       {status === 'success' && (
-        <p className="form-message success">Thanks! We will reach out to you with matching pets soon.</p>
+        <p className="form-message success">{t.findPetForm.success}</p>
       )}
       {status === 'error' && (
         <p className="form-message error">{errorMsg}</p>
