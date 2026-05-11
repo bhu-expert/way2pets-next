@@ -32,7 +32,7 @@ function request(formData, token = 'token') {
   }
 }
 
-function galleryForm() {
+function galleryForm(overrides = {}) {
   const form = new FormData()
   form.set('file', new File(['image'], 'dog.jpg', { type: 'image/jpeg' }))
   form.set('createGallery', 'true')
@@ -43,6 +43,10 @@ function galleryForm() {
   form.set('subcategory', 'dog-health')
   form.set('isVisible', 'true')
   form.set('sortOrder', '0')
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === undefined) form.delete(key)
+    else form.set(key, value)
+  }
   return form
 }
 
@@ -91,15 +95,58 @@ test('Gallery upload API handles Cloudinary success and inserts media/gallery ro
 test('Gallery upload API handles media_assets insert failure', async () => withCloudinaryEnv(async () => {
   const result = await handleGalleryUpload(request(galleryForm()), deps({ insertRow: async (table) => { if (table === 'media_assets') throw Object.assign(new Error('column missing'), { code: '42703' }); return [] } }))
   assert.equal(result.status, 500)
-  assert.equal(result.body.message, 'Media asset insert failed.')
+  assert.equal(result.body.message, 'media_assets insert failed.')
   assert.equal(result.body.details.code, '42703')
 }))
 
 test('Gallery upload API handles gallery_images insert failure', async () => withCloudinaryEnv(async () => {
   const result = await handleGalleryUpload(request(galleryForm()), deps({ insertRow: async (table, body) => { if (table === 'gallery_images') throw Object.assign(new Error('violates foreign key'), { code: '23503' }); return [{ id: 'asset-1', ...body }] } }))
   assert.equal(result.status, 500)
-  assert.equal(result.body.message, 'Gallery image insert failed.')
+  assert.equal(result.body.message, 'gallery_images insert failed.')
   assert.equal(result.body.details.code, '23503')
+}))
+
+
+test('Gallery upload API saves blank optional subcategory as null for requested real-world image', async () => withCloudinaryEnv(async () => {
+  const calls = []
+  const form = galleryForm({
+    title: 'Caring hands check street dog’s fur',
+    caption: "Caring hands check street dog's fur",
+    altText: 'Caring hands check street dog’s fur at Way2Pets',
+    category: 'blog',
+    subcategory: '',
+    isVisible: 'true',
+    isFeatured: 'false',
+    sortOrder: '0',
+  })
+  const result = await handleGalleryUpload(request(form), deps({ insertRow: async (table, body) => { calls.push({ table, body }); return [{ id: table === 'media_assets' ? 'asset-1' : 'gallery-1', ...body }] } }))
+  assert.equal(result.status, 200)
+  assert.equal(calls[0].table, 'media_assets')
+  assert.equal(calls[1].table, 'gallery_images')
+  assert.equal(calls[1].body.media_asset_id, 'asset-1')
+  assert.equal(calls[1].body.subcategory, null)
+  assert.equal(calls[1].body.is_visible, true)
+  assert.equal(calls[1].body.is_featured, false)
+}))
+
+test('Gallery upload API saves filled optional subcategory', async () => withCloudinaryEnv(async () => {
+  const calls = []
+  const form = galleryForm({ category: 'blog', subcategory: 'dog-health' })
+  const result = await handleGalleryUpload(request(form), deps({ insertRow: async (table, body) => { calls.push({ table, body }); return [{ id: table === 'media_assets' ? 'asset-1' : 'gallery-1', ...body }] } }))
+  assert.equal(result.status, 200)
+  assert.equal(calls[1].body.category, 'blog')
+  assert.equal(calls[1].body.subcategory, 'dog-health')
+}))
+
+test('Gallery upload API returns actionable missing subcategory schema cache error', async () => withCloudinaryEnv(async () => {
+  const result = await handleGalleryUpload(request(galleryForm()), deps({ insertRow: async (table, body) => {
+    if (table === 'gallery_images') throw Object.assign(new Error("Could not find the 'subcategory' column of 'gallery_images' in the schema cache"), { code: 'PGRST204' })
+    return [{ id: 'asset-1', ...body }]
+  } }))
+  assert.equal(result.status, 500)
+  assert.match(result.body.message, /missing subcategory column/)
+  assert.equal(result.body.details.table, 'gallery_images')
+  assert.ok(result.body.details.payloadKeys.includes('subcategory'))
 }))
 
 test('Gallery payload builders map form fields without requiring manual media_asset_id', () => {

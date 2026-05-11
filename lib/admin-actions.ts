@@ -41,6 +41,10 @@ export async function saveCmsResource(formData: FormData) {
     if (value !== null || field.type === 'checkbox') body[field.name] = value
   }
 
+  if (resource.table === 'gallery_images') {
+    body.subcategory = String(formData.get('subcategory') || '').trim() || null
+  }
+
   if (resource.table === 'blog_posts') {
     const category = String(body.category || 'general')
     const subcategory = String(body.subcategory || '')

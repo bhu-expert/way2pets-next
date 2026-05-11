@@ -162,8 +162,8 @@ export const resources: Record<string, ResourceConfig> = {
   },
   gallery: {
     table: 'gallery_images', title: 'Gallery Manager', description: 'Upload Cloudinary images and control public gallery visibility.', newPath: '/admin/gallery?new=1', editPath: '/admin/gallery',
-    columns: [{ key: 'title', label: 'Title' }, { key: 'category', label: 'Category' }, { key: 'is_visible', label: 'Visible' }, { key: 'is_featured', label: 'Featured' }],
+    columns: [{ key: 'title', label: 'Title' }, { key: 'category', label: 'Category' }, { key: 'subcategory', label: 'Subcategory' }, { key: 'is_visible', label: 'Visible' }, { key: 'is_featured', label: 'Featured' }],
     fields: [{ name: 'title', label: 'Title' }, { name: 'caption', label: 'Caption', type: 'textarea' }, { name: 'alt_text', label: 'Alt text' }, { name: 'category', label: 'Category', type: 'select', options: galleryCategories }, { name: 'subcategory', label: 'Subcategory' }, { name: 'pet_type', label: 'Pet type', type: 'select', options: petTypes }, { name: 'is_visible', label: 'Visible', type: 'checkbox' }, { name: 'is_featured', label: 'Featured', type: 'checkbox' }, { name: 'sort_order', label: 'Sort order', type: 'number' }],
-    searchKeys: ['title', 'caption', 'category'], statusKey: 'is_visible', statusOptions: ['true', 'false'],
+    searchKeys: ['title', 'caption', 'category', 'subcategory'], statusKey: 'is_visible', statusOptions: ['true', 'false'],
   },
 }

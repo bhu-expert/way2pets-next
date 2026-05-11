@@ -15,6 +15,7 @@ type GalleryRow = {
   alt_text?: string
   caption?: string
   category?: string
+  subcategory?: string
   media_assets?: { secure_url?: string; width?: number; height?: number; alt_text?: string }
 }
 
@@ -34,7 +35,7 @@ export default async function GalleryPage() {
         ) : rows.map((row) => (
           <article className="blog-card" key={row.id}>
             {row.media_assets?.secure_url ? <Image className="blog-img" src={row.media_assets.secure_url} alt={row.alt_text || row.media_assets.alt_text || row.title || 'Way2Pets gallery image'} width={row.media_assets.width || 900} height={row.media_assets.height || 600} /> : null}
-            <div className="blog-content"><span className="blog-date">{row.category}</span><h2 className="blog-title">{row.title}</h2><p>{row.caption}</p></div>
+            <div className="blog-content"><span className="blog-date">{[row.category, row.subcategory].filter(Boolean).join(' / ')}</span><h2 className="blog-title">{row.title}</h2><p>{row.caption}</p></div>
           </article>
         ))}
       </div>
