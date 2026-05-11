@@ -3,11 +3,12 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import StickyCtas from '@/components/StickyCtas'
+import { LanguageProvider } from '@/src/i18n'
 
 
 export const metadata: Metadata = {
-  title: 'Way2Pets Lucknow | Natural Pet Care, Boarding & Adoption',
-  description: "Way2Pets is Lucknow's trusted pet shop for natural dog food, cage-free boarding, puppy adoption, and holistic pet care.",
+  title: 'Way2Pets | Natural Pet Care, Boarding & Pet Adoption in Lucknow',
+  description: 'Way2Pets offers cage-free pet boarding, natural pet care, pet adoption guidance and expert dog and cat care in Lucknow.',
 }
 
 export default function RootLayout({
@@ -24,10 +25,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <Navbar />
-        <main>{children}</main>
-        <StickyCtas />
-        <Footer />
+        <LanguageProvider>
+          <Navbar />
+          <main>{children}</main>
+          <StickyCtas />
+          <Footer />
+        </LanguageProvider>
       </body>
     </html>
   )

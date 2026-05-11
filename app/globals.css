@@ -105,12 +105,15 @@ nav {
 
 .nav-links {
   display: flex;
-  gap: 30px;
+  gap: 18px;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .nav-links a {
   font-weight: 500;
+  white-space: nowrap;
   color: var(--dark-text);
   transition: color 0.3s;
 }
@@ -121,6 +124,37 @@ nav {
 
 .nav-links a.active {
   color: var(--accent-orange);
+}
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--light-green);
+  border-radius: 999px;
+  background: #f8fff8;
+}
+
+.language-switcher button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dark-text);
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 8px 11px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.language-switcher button:hover,
+.language-switcher button.active {
+  background: var(--primary-green);
+  color: var(--white);
 }
 
 /* --- HERO SECTION --- */
@@ -686,9 +720,13 @@ footer h2 span {
     padding: 16px 20px 24px;
     box-shadow: 0 12px 24px rgba(0,0,0,.12);
     flex-direction: column;
+    align-items: stretch;
     gap: 16px;
   }
   .nav-links.open { display: flex; }
+  .nav-links a { text-align: center; }
+  .language-switcher { justify-content: center; width: 100%; }
+  .language-switcher button { flex: 1; }
   .sticky-ctas { left: 10px; right: 10px; bottom: 10px; flex-direction: row; justify-content: center; }
   .sticky-ctas a { font-size: 0.8rem; padding: 9px 10px; }
   .admin-shell { flex-direction: column; }
