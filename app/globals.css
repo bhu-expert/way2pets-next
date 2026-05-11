@@ -722,3 +722,119 @@ footer h2 span {
 .breadcrumbs { margin-bottom: 24px; color: var(--light-text); font-size: .95rem; }
 .breadcrumbs a { color: var(--primary-green); }
 .article-cta { margin-top: 40px; background: var(--light-green); padding: 28px; border-radius: 18px; }
+
+.admin-button,
+.admin-filters button,
+.admin-upload-form button,
+.admin-form-actions button {
+  background: var(--primary-green);
+  border: 0;
+  color: white;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+}
+
+.admin-filters input,
+.admin-filters select,
+.admin-form-grid input,
+.admin-form-grid select,
+.admin-form-grid textarea,
+.admin-upload-form input,
+.admin-upload-form select {
+  width: 100%;
+  border: 1px solid #d8e6d9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.admin-filters input,
+.admin-filters select {
+  width: min(280px, 100%);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-actions a {
+  color: var(--primary-green);
+  font-weight: 700;
+}
+
+.admin-actions button,
+.admin-danger-form button {
+  border: 0;
+  background: #ffe8e8;
+  color: #9f1d1d;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.admin-form-grid label span {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.admin-form-grid small {
+  color: var(--light-text);
+}
+
+.admin-field-wide {
+  grid-column: 1 / -1;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.admin-danger-form {
+  margin-top: 16px;
+}
+
+.admin-recent-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-recent-item {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #edf4ee;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fbfffb;
+}
+
+.admin-upload-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.admin-upload-form h2,
+.admin-upload-form p {
+  grid-column: 1 / -1;
+}

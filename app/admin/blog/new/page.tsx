@@ -1,5 +1,6 @@
-import AdminTable from '@/components/admin/AdminTable'
+import CmsForm from '@/components/admin/CmsForm'
+import { resources } from '@/lib/cms'
 
 export default function Page() {
-  return <AdminTable title="New Blog Article" description="Create a static/ISR-ready SEO article with metadata and FAQ blocks." columns={['Field', 'Value']} />
+  return <CmsForm resourceKey="blog" resource={resources.blog} row={null} />
 }

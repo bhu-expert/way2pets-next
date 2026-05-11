@@ -1,5 +1,6 @@
-import AdminTable from '@/components/admin/AdminTable'
+import CmsForm from '@/components/admin/CmsForm'
+import { resources } from '@/lib/cms'
 
 export default function Page() {
-  return <AdminTable title="New Pet Listing" description="Add a puppy, kitten or adoption listing with Cloudinary images and SEO metadata." columns={['Field', 'Value']} />
+  return <CmsForm resourceKey="pets" resource={resources.pets} row={null} />
 }
