@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { galleryCategories } from '@/lib/taxonomy'
 
 type UploadAsset = { id?: string; secure_url?: string; width?: number; height?: number; title?: string }
+type UploadResponse = { success?: boolean; message?: string; details?: unknown; asset?: UploadAsset }
 
 export default function GalleryUpload() {
   const [message, setMessage] = useState('')
@@ -18,9 +19,12 @@ export default function GalleryUpload() {
     const form = event.currentTarget
     try {
       const res = await fetch('/api/admin/media/upload', { method: 'POST', body: new FormData(form), credentials: 'same-origin' })
-      const json = await res.json()
-      if (!res.ok || !json.success) throw new Error(json.message || 'Upload failed')
-      setAsset(json.asset)
+      const json = await res.json() as UploadResponse
+      if (!res.ok || !json.success) {
+        const detailText = typeof json.details === 'string' ? json.details : json.details && typeof json.details === 'object' && 'message' in json.details ? String((json.details as { message?: unknown }).message || '') : ''
+        throw new Error([json.message || 'Upload failed', detailText].filter(Boolean).join(': '))
+      }
+      setAsset(json.asset || null)
       setMessage('Saved. The image is now available in Gallery Manager and the public gallery when visible is checked.')
       form.reset()
     } catch (error) {

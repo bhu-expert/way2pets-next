@@ -838,3 +838,9 @@ footer h2 span {
 .admin-upload-form p {
   grid-column: 1 / -1;
 }
+
+.admin-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
