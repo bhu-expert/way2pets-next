@@ -3,13 +3,21 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Hero from '@/components/Hero'
 import ContactForm from '@/components/ContactForm'
+import { getRows } from '@/lib/supabase'
 
 export const metadata: Metadata = {
   title: 'Way2Pets Lucknow | Natural Pet Care, Boarding & Adoption',
   description: "Way2Pets is Lucknow's trusted pet shop for natural dog food, cage-free boarding, puppy adoption, and holistic pet care.",
 }
 
-export default function HomePage() {
+type Review = { id?: string; review_text: string; reviewer_name: string; rating?: number }
+
+async function getFeaturedReviews() {
+  try { return await getRows<Review>('reviews?status=eq.published&is_featured=eq.true&select=*&order=created_at.desc&limit=3', false) || [] } catch { return [] }
+}
+
+export default async function HomePage() {
+  const featuredReviews = await getFeaturedReviews()
   return (
     <>
       <Hero
@@ -139,21 +147,17 @@ export default function HomePage() {
       <section className="reviews">
         <h2>What Pet Parents Say</h2>
         <div className="reviews-grid">
-          <div className="review-card">
-            <p>&ldquo;Best pet shop in Lucknow. I got a golden retriever puppy who is very healthy and lovely.&rdquo;</p>
-            <div className="stars">★★★★★</div>
-            <div className="reviewer">- <span style={{ fontWeight: 600 }}>Advocate Manvi Raj</span></div>
-          </div>
-          <div className="review-card">
-            <p>&ldquo;An amazing place like home for your dogs. I always fall back on Way2Pets if I ever need anything.&rdquo;</p>
-            <div className="stars">★★★★★</div>
-            <div className="reviewer">- <span style={{ fontWeight: 600 }}>Ramita</span></div>
-          </div>
-          <div className="review-card">
-            <p>&ldquo;Ashish is very nice. He has in-depth knowledge about dogs and takes care of your pets like his own.&rdquo;</p>
-            <div className="stars">★★★★★</div>
-            <div className="reviewer">- <span style={{ fontWeight: 600 }}>Varun Garg</span></div>
-          </div>
+          {(featuredReviews.length > 0 ? featuredReviews : [
+            { review_text: 'Best pet shop in Lucknow. I got a golden retriever puppy who is very healthy and lovely.', reviewer_name: 'Advocate Manvi Raj', rating: 5 },
+            { review_text: 'An amazing place like home for your dogs. I always fall back on Way2Pets if I ever need anything.', reviewer_name: 'Ramita', rating: 5 },
+            { review_text: 'Ashish is very nice. He has in-depth knowledge about dogs and takes care of your pets like his own.', reviewer_name: 'Varun Garg', rating: 5 },
+          ]).map((review) => (
+            <div className="review-card" key={review.id || review.reviewer_name}>
+              <p>&ldquo;{review.review_text}&rdquo;</p>
+              <div className="stars">{'★'.repeat(review.rating || 5)}</div>
+              <div className="reviewer">- <span style={{ fontWeight: 600 }}>{review.reviewer_name}</span></div>
+            </div>
+          ))}
         </div>
         <Link href="/reviews" className="btn btn-primary" style={{ marginTop: '40px', display: 'inline-block' }}>
           Read All Reviews

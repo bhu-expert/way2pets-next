@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation'
-import CmsForm from '@/components/admin/CmsForm'
-import { getRow, resources, type CmsRow } from '@/lib/cms'
+import PetEditor from '@/components/admin/PetEditor'
+import { getRow, type CmsRow } from '@/lib/cms'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const resource = resources.pets
-  const row = await getRow<CmsRow>(resource.table, id, resource.select || '*')
+  const row = await getRow<CmsRow>('pets', id, '*')
   if (!row) notFound()
-  return <CmsForm resourceKey="pets" resource={resource} row={row} />
+  return <PetEditor row={row} />
 }

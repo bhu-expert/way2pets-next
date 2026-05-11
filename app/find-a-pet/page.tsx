@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import Hero from '@/components/Hero'
 import FindPetForm from '@/components/FindPetForm'
@@ -10,10 +11,16 @@ export const metadata: Metadata = {
 
 import { getRows } from '@/lib/supabase'
 
-type Pet = { id: string; name: string; slug: string; pet_type: string; breed?: string; age?: string; availability_status?: string; description?: string }
+type Pet = { id: string; name: string; slug: string; pet_type: string; breed?: string; age?: string; availability_status?: string; description?: string; image_ids?: string[]; media?: { secure_url?: string; width?: number; height?: number; alt_text?: string } }
 
 async function getPets() {
-  try { return await getRows<Pet>('pets?status=eq.published&select=*&order=created_at.desc&limit=12', false) || [] } catch { return [] }
+  try {
+    const pets = await getRows<Pet>('pets?status=eq.published&select=*&order=created_at.desc&limit=12', false) || []
+    const ids = pets.flatMap((pet) => pet.image_ids || []).filter(Boolean)
+    if (!ids.length) return pets
+    const mediaRows = await getRows<{ id: string; secure_url?: string; width?: number; height?: number; alt_text?: string }>(`media_assets?id=in.(${ids.join(',')})&select=*`, false) || []
+    return pets.map((pet) => ({ ...pet, media: mediaRows.find((media) => media.id === pet.image_ids?.[0]) }))
+  } catch { return [] }
 }
 
 export default async function FindAPetPage() {
@@ -56,6 +63,7 @@ export default async function FindAPetPage() {
           <div className="blog-grid">
             {pets.map((pet) => (
               <article key={pet.id} className="blog-card">
+                {pet.media?.secure_url ? <Image className="blog-img" src={pet.media.secure_url} alt={pet.media.alt_text || pet.name} width={pet.media.width || 900} height={pet.media.height || 600} /> : null}
                 <div className="blog-content">
                   <span className="blog-date">{pet.pet_type} · {pet.availability_status || 'available'}</span>
                   <h3 className="blog-title">{pet.name}</h3>

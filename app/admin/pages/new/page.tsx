@@ -1,6 +1,5 @@
-import CmsForm from '@/components/admin/CmsForm'
-import { resources } from '@/lib/cms'
+import PageEditor from '@/components/admin/PageEditor'
 
 export default function Page() {
-  return <CmsForm resourceKey="pages" resource={resources.pages} row={null} />
+  return <PageEditor row={null} />
 }

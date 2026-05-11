@@ -1,6 +1,5 @@
-import CmsForm from '@/components/admin/CmsForm'
-import { resources } from '@/lib/cms'
+import PetEditor from '@/components/admin/PetEditor'
 
 export default function Page() {
-  return <CmsForm resourceKey="pets" resource={resources.pets} row={null} />
+  return <PetEditor row={null} />
 }

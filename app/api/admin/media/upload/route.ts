@@ -1,33 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthUser, insertRow, isAllowedAdmin } from '@/lib/supabase'
 import { adminCookieName } from '@/lib/admin'
 import { hasCloudinaryConfig, signCloudinaryParams } from '@/lib/cloudinary'
+import { galleryCategories } from '@/lib/taxonomy'
+import { getAuthUser, insertRow, isAllowedAdmin } from '@/lib/supabase'
+
+function json(message: string, status: number, details?: unknown) {
+  return NextResponse.json({ success: false, message, details }, { status })
+}
 
 export async function POST(req: NextRequest) {
   const token = req.cookies.get(adminCookieName)?.value
   const user = await getAuthUser(token)
 
-  if (!user || !isAllowedAdmin(user.email)) {
-    return NextResponse.json({ success: false, message: 'Unauthorized.' }, { status: 401 })
+  if (!token || !user || !isAllowedAdmin(user.email)) {
+    return json('Unauthorized admin. Please log in again before uploading.', 401)
   }
 
-  if (!hasCloudinaryConfig()) {
-    return NextResponse.json({ success: false, message: 'Cloudinary is not configured.' }, { status: 500 })
+  const missing = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'].filter((key) => !process.env[key])
+  if (!hasCloudinaryConfig() || missing.length > 0) {
+    return json(`Missing Cloudinary env variable${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}`, 500)
   }
 
   const formData = await req.formData()
   const file = formData.get('file')
-  const category = String(formData.get('category') || 'gallery')
-  const title = String(formData.get('title') || '')
-  const altText = String(formData.get('altText') || '')
-  const caption = String(formData.get('caption') || '')
-  const createGallery = String(formData.get('createGallery') || '') === 'true'
-  const petType = String(formData.get('petType') || 'general')
-  const isFeatured = String(formData.get('isFeatured') || '') === 'on'
-
-  if (!(file instanceof File)) {
-    return NextResponse.json({ success: false, message: 'Image file is required.' }, { status: 400 })
+  if (!(file instanceof File) || file.size === 0) {
+    return json('Image file is required.', 400)
   }
+
+  const rawCategory = String(formData.get('category') || 'gallery')
+  const category = [...galleryCategories, 'pets'].includes(rawCategory) ? rawCategory : 'gallery'
+  const title = String(formData.get('title') || '')
+  const altText = String(formData.get('altText') || formData.get('alt_text') || '')
+  const caption = String(formData.get('caption') || '')
+  const subcategory = String(formData.get('subcategory') || '')
+  const createGallery = String(formData.get('createGallery') || '') === 'true'
+  const petType = String(formData.get('petType') || formData.get('pet_type') || (category === 'dogs' ? 'dog' : category === 'cats' ? 'cat' : 'general'))
+  const isFeatured = ['on', 'true', '1'].includes(String(formData.get('isFeatured') || formData.get('is_featured') || ''))
+  const isVisible = !['false', '0'].includes(String(formData.get('isVisible') || formData.get('is_visible') || 'true'))
+  const sortOrder = Number(formData.get('sortOrder') || formData.get('sort_order') || 0)
 
   const timestamp = Math.round(Date.now() / 1000)
   const folder = `way2pets/${category}`
@@ -39,55 +49,34 @@ export async function POST(req: NextRequest) {
   uploadData.append('folder', folder)
   uploadData.append('signature', signature)
 
-  const upload = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/auto/upload`, {
-    method: 'POST',
-    body: uploadData,
-  })
-
+  const upload = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/auto/upload`, { method: 'POST', body: uploadData })
   if (!upload.ok) {
-    return NextResponse.json({ success: false, message: 'Cloudinary upload failed.' }, { status: 502 })
+    const text = await upload.text()
+    return json('Cloudinary upload failed.', 502, text)
   }
 
-  const uploaded = await upload.json() as {
-    public_id: string
-    secure_url: string
-    width?: number
-    height?: number
-    format?: string
-    resource_type?: string
-    bytes?: number
-  }
+  const uploaded = await upload.json() as { public_id: string; secure_url: string; width?: number; height?: number; format?: string; resource_type?: string; bytes?: number }
 
-  const rows = await insertRow('media_assets', {
-    provider: 'cloudinary',
-    category,
-    public_id: uploaded.public_id,
-    secure_url: uploaded.secure_url,
-    width: uploaded.width,
-    height: uploaded.height,
-    format: uploaded.format,
-    resource_type: uploaded.resource_type || 'image',
-    bytes: uploaded.bytes,
-    alt_text: altText,
-    title,
-    caption,
-    uploaded_by: user.id,
-  })
+  let rows
+  try {
+    rows = await insertRow<Record<string, unknown>>('media_assets', {
+      provider: 'cloudinary', category, public_id: uploaded.public_id, secure_url: uploaded.secure_url,
+      width: uploaded.width, height: uploaded.height, format: uploaded.format, resource_type: uploaded.resource_type || 'image', bytes: uploaded.bytes,
+      alt_text: altText, title, caption, uploaded_by: user.id,
+    })
+  } catch (error) {
+    return json('Supabase insert failed while saving media metadata.', 500, error instanceof Error ? error.message : String(error))
+  }
 
   const asset = rows?.[0] || uploaded
   const assetId = typeof asset === 'object' && asset !== null && 'id' in asset ? String(asset.id) : ''
 
   if (createGallery && assetId) {
-    await insertRow('gallery_images', {
-      media_asset_id: assetId,
-      title,
-      alt_text: altText,
-      caption,
-      category,
-      pet_type: petType,
-      is_visible: true,
-      is_featured: isFeatured,
-    })
+    try {
+      await insertRow('gallery_images', { media_asset_id: assetId, title, alt_text: altText, caption, category, subcategory: subcategory || null, pet_type: petType, is_visible: isVisible, is_featured: isFeatured, sort_order: Number.isFinite(sortOrder) ? sortOrder : 0 })
+    } catch (error) {
+      return json('Supabase insert failed while saving gallery image.', 500, error instanceof Error ? error.message : String(error))
+    }
   }
 
   return NextResponse.json({ success: true, asset })

@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { Article, renderMarkdown } from '@/lib/content'
+import { markdownToHtml, sanitizeHtml } from '@/lib/html'
 import { JsonLd } from '@/lib/seo'
 import { absoluteUrl } from '@/lib/site'
 
 export default function ArticlePage({ article }: { article: Article }) {
-  const blocks = renderMarkdown(article.content_markdown)
+  const html = sanitizeHtml(article.content_html || markdownToHtml(article.content_markdown || ''))
+  const blocks = renderMarkdown(article.content_markdown || '')
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -22,7 +24,7 @@ export default function ArticlePage({ article }: { article: Article }) {
       <nav className="breadcrumbs" aria-label="Breadcrumbs">
         <Link href="/">Home</Link> / <Link href={`/${article.pet_type === 'cat' ? 'cats' : 'dogs'}`}>{article.pet_type === 'cat' ? 'Cats' : 'Dogs'}</Link> / <span>{article.title}</span>
       </nav>
-      {blocks.map((block) => {
+      {article.content_html ? <div className="article-content" dangerouslySetInnerHTML={{ __html: html }} /> : blocks.map((block) => {
         if (block.type === 'h1') return <h1 key={block.key}>{block.text}</h1>
         if (block.type === 'h2') return <h2 key={block.key}>{block.text}</h2>
         return <p key={block.key}>{block.text}</p>

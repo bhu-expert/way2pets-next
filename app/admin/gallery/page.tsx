@@ -1,4 +1,3 @@
-import CmsForm from '@/components/admin/CmsForm'
 import CmsList from '@/components/admin/CmsList'
 import GalleryUpload from '@/components/admin/GalleryUpload'
 import { listRows, resources, type CmsRow } from '@/lib/cms'
@@ -6,7 +5,7 @@ import { listRows, resources, type CmsRow } from '@/lib/cms'
 export default async function Page({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string; new?: string }> }) {
   const params = await searchParams
   const resource = resources.gallery
-  if (params?.new) return <CmsForm resourceKey="gallery" resource={resource} row={null} />
+  if (params?.new) return <GalleryUpload />
   const rows = await listRows<CmsRow>(resource.table, resource.select || '*', 100)
   const q = (params?.q || '').toLowerCase()
   const status = params?.status || ''
