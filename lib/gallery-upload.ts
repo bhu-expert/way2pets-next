@@ -106,10 +106,12 @@ export function buildGalleryImagePayload(assetId: string, form: ReturnType<typeo
   }
 }
 
-export function readableSupabaseDetails(error: unknown) {
+export function readableSupabaseDetails(error: unknown, table: string, payload?: Record<string, unknown>) {
+  const base = { table, payloadKeys: payload ? Object.keys(payload).sort() : [] }
   if (error && typeof error === 'object') {
     const maybe = error as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown; status?: unknown; body?: unknown }
     return {
+      ...base,
       message: String(maybe.message || 'Supabase request failed.'),
       code: maybe.code,
       details: maybe.details,
@@ -118,7 +120,12 @@ export function readableSupabaseDetails(error: unknown) {
       body: maybe.body,
     }
   }
-  return { message: String(error) }
+  return { ...base, message: String(error) }
+}
+
+function isMissingSubcategoryColumn(details: { message?: string; code?: unknown; details?: unknown; hint?: unknown; body?: unknown }) {
+  const haystack = [details.message, details.details, details.hint, details.body].map((value) => String(value || '')).join(' ')
+  return /subcategory/i.test(haystack) && (/schema cache/i.test(haystack) || details.code === 'PGRST204' || details.code === '42703')
 }
 
 function success(body: Record<string, unknown>, status = 200): GalleryUploadResult {
@@ -159,31 +166,36 @@ export async function handleGalleryUpload(req: Request & { cookies?: { get: (nam
   }
 
   let mediaRows: Record<string, unknown>[] | null
+  const mediaPayload = buildMediaAssetPayload(uploaded, form, user.id)
   try {
-    mediaRows = await deps.insertRow<Record<string, unknown>>('media_assets', buildMediaAssetPayload(uploaded, form, user.id))
+    mediaRows = await deps.insertRow<Record<string, unknown>>('media_assets', mediaPayload)
   } catch (error) {
-    const details = readableSupabaseDetails(error)
+    const details = readableSupabaseDetails(error, 'media_assets', mediaPayload)
     logger.error('Gallery media_assets insert failed.', details)
-    return failure('Media asset insert failed.', 500, details)
+    return failure('media_assets insert failed.', 500, details)
   }
 
   const asset = mediaRows?.[0]
   const assetId = asset?.id ? String(asset.id) : ''
   if (!assetId) {
-    const details = { message: 'Supabase media_assets insert did not return an id.', mediaRows }
+    const details = { table: 'media_assets', message: 'Supabase media_assets insert did not return an id.', payloadKeys: Object.keys(mediaPayload).sort(), mediaRows }
     logger.error('Gallery media_assets insert returned no id.', details)
-    return failure('Media asset insert failed.', 500, details)
+    return failure('Missing media_asset_id after media_assets insert.', 500, details)
   }
 
   let gallery: Record<string, unknown> | null = null
   if (form.createGallery) {
+    const galleryPayload = buildGalleryImagePayload(assetId, form)
     try {
-      const galleryRows = await deps.insertRow<Record<string, unknown>>('gallery_images', buildGalleryImagePayload(assetId, form))
+      const galleryRows = await deps.insertRow<Record<string, unknown>>('gallery_images', galleryPayload)
       gallery = galleryRows?.[0] || null
     } catch (error) {
-      const details = readableSupabaseDetails(error)
+      const details = readableSupabaseDetails(error, 'gallery_images', galleryPayload)
       logger.error('Gallery gallery_images insert failed.', details)
-      return failure('Gallery image insert failed.', 500, details)
+      if (isMissingSubcategoryColumn(details)) {
+        return failure('Gallery image insert failed: missing subcategory column on gallery_images. Run the gallery subcategory migration and reload the Supabase schema cache.', 500, details)
+      }
+      return failure('gallery_images insert failed.', 500, details)
     }
   }
 
