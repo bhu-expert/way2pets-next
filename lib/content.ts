@@ -7,6 +7,7 @@ export interface Article {
   pet_type: 'dog' | 'cat' | 'both' | 'general'
   excerpt: string
   content_markdown: string
+  content_html?: string
   status: string
   published_at?: string
   faq_json?: Array<{ question: string; answer: string }>

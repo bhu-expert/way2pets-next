@@ -1,3 +1,4 @@
+import { galleryCategories } from './taxonomy'
 import { getRows, supabaseRest } from './supabase'
 
 export type CmsRow = Record<string, unknown> & { id?: string; created_at?: string; updated_at?: string }
@@ -96,24 +97,25 @@ export const resources: Record<string, ResourceConfig> = {
   },
   blog: {
     table: 'blog_posts', title: 'Blog Manager', description: 'Manage dog, cat and general articles with markdown content and SEO-ready paths.', newPath: '/admin/blog/new', editPath: '/admin/blog',
-    columns: [{ key: 'title', label: 'Title' }, { key: 'full_path', label: 'Full Path' }, { key: 'pet_type', label: 'Pet Type' }, { key: 'status', label: 'Status' }],
+    columns: [{ key: 'title', label: 'Title' }, { key: 'full_path', label: 'Full Path' }, { key: 'category', label: 'Category' }, { key: 'subcategory', label: 'Subcategory' }, { key: 'status', label: 'Status' }],
     fields: [
-      { name: 'title', label: 'Title', required: true }, { name: 'slug', label: 'Slug', required: true }, { name: 'full_path', label: 'Full path', required: true },
-      { name: 'pet_type', label: 'Pet type', type: 'select', options: petTypes }, { name: 'excerpt', label: 'Excerpt', type: 'textarea' },
-      { name: 'content_markdown', label: 'Markdown content', type: 'textarea' }, { name: 'status', label: 'Status', type: 'select', options: contentStatuses },
-      { name: 'published_at', label: 'Published date', type: 'date' }, { name: 'faq_json', label: 'FAQ JSON', type: 'json' },
+      { name: 'title', label: 'Title', required: true }, { name: 'slug', label: 'Slug', required: true },
+      { name: 'category', label: 'Category', type: 'select', options: ['dogs', 'cats', 'general'] }, { name: 'subcategory', label: 'Subcategory' }, { name: 'full_path', label: 'Full path', required: true },
+      { name: 'excerpt', label: 'Excerpt', type: 'textarea' }, { name: 'content_html', label: 'Article content (HTML allowed)', type: 'textarea' }, { name: 'content_markdown', label: 'Markdown content', type: 'textarea' },
+      { name: 'featured_image_id', label: 'Featured media asset ID' }, { name: 'meta_title', label: 'SEO title' }, { name: 'meta_description', label: 'SEO description', type: 'textarea' }, { name: 'canonical_url', label: 'Canonical URL' }, { name: 'og_title', label: 'OG title' }, { name: 'og_description', label: 'OG description', type: 'textarea' }, { name: 'og_image_id', label: 'OG image asset ID' },
+      { name: 'status', label: 'Status', type: 'select', options: contentStatuses }, { name: 'published_at', label: 'Published date', type: 'date' }, { name: 'faq_json', label: 'FAQ JSON', type: 'json' },
     ], searchKeys: ['title', 'full_path'], statusKey: 'status', statusOptions: contentStatuses,
   },
   pets: {
     table: 'pets', title: 'Pet Manager', description: 'Manage puppy, kitten, sale and adoption listings.', newPath: '/admin/pets/new', editPath: '/admin/pets',
     columns: [{ key: 'name', label: 'Name' }, { key: 'pet_type', label: 'Pet Type' }, { key: 'breed', label: 'Breed' }, { key: 'availability_status', label: 'Availability' }],
     fields: [
-      { name: 'name', label: 'Name', required: true }, { name: 'slug', label: 'SEO slug', required: true }, { name: 'pet_type', label: 'Pet type', type: 'select', options: ['dog', 'cat'] },
+      { name: 'name', label: 'Name', required: true }, { name: 'slug', label: 'SEO slug', required: true }, { name: 'pet_type', label: 'Category', type: 'select', options: ['dog', 'cat'] }, { name: 'subcategory', label: 'Subcategory', type: 'select', options: ['puppy', 'kitten', 'adult', 'adoption', 'sale'] },
       { name: 'listing_type', label: 'Listing type', type: 'select', options: ['sale', 'adoption'] }, { name: 'breed', label: 'Breed' }, { name: 'age', label: 'Age' },
       { name: 'gender', label: 'Gender', type: 'select', options: ['male', 'female', 'unknown'] }, { name: 'price', label: 'Price', type: 'number' }, { name: 'location', label: 'City/location' },
       { name: 'vaccination_status', label: 'Vaccination status' }, { name: 'temperament', label: 'Temperament' }, { name: 'health_notes', label: 'Health notes', type: 'textarea' },
       { name: 'description', label: 'Description', type: 'textarea' }, { name: 'availability_status', label: 'Availability', type: 'select', options: ['available', 'reserved', 'sold', 'adopted', 'unavailable'] },
-      { name: 'status', label: 'Status', type: 'select', options: contentStatuses },
+      { name: 'status', label: 'Status', type: 'select', options: contentStatuses }, { name: 'meta_title', label: 'Meta title' }, { name: 'meta_description', label: 'Meta description', type: 'textarea' },
     ], searchKeys: ['name', 'breed', 'location'], statusKey: 'availability_status', statusOptions: ['available', 'reserved', 'sold', 'adopted', 'unavailable'],
   },
   leads: {
@@ -161,7 +163,7 @@ export const resources: Record<string, ResourceConfig> = {
   gallery: {
     table: 'gallery_images', title: 'Gallery Manager', description: 'Upload Cloudinary images and control public gallery visibility.', newPath: '/admin/gallery?new=1', editPath: '/admin/gallery',
     columns: [{ key: 'title', label: 'Title' }, { key: 'category', label: 'Category' }, { key: 'is_visible', label: 'Visible' }, { key: 'is_featured', label: 'Featured' }],
-    fields: [{ name: 'media_asset_id', label: 'Media asset ID', required: true }, { name: 'title', label: 'Title' }, { name: 'caption', label: 'Caption', type: 'textarea' }, { name: 'alt_text', label: 'Alt text' }, { name: 'category', label: 'Category', type: 'select', options: ['boarding', 'grooming', 'puppies', 'kittens', 'happy-pets', 'facility', 'reviews', 'blog', 'hero', 'gallery'] }, { name: 'pet_type', label: 'Pet type', type: 'select', options: petTypes }, { name: 'is_visible', label: 'Visible', type: 'checkbox' }, { name: 'is_featured', label: 'Featured', type: 'checkbox' }, { name: 'sort_order', label: 'Sort order', type: 'number' }],
+    fields: [{ name: 'title', label: 'Title' }, { name: 'caption', label: 'Caption', type: 'textarea' }, { name: 'alt_text', label: 'Alt text' }, { name: 'category', label: 'Category', type: 'select', options: galleryCategories }, { name: 'subcategory', label: 'Subcategory' }, { name: 'pet_type', label: 'Pet type', type: 'select', options: petTypes }, { name: 'is_visible', label: 'Visible', type: 'checkbox' }, { name: 'is_featured', label: 'Featured', type: 'checkbox' }, { name: 'sort_order', label: 'Sort order', type: 'number' }],
     searchKeys: ['title', 'caption', 'category'], statusKey: 'is_visible', statusOptions: ['true', 'false'],
   },
 }

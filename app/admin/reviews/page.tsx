@@ -1,5 +1,6 @@
 import CmsForm from '@/components/admin/CmsForm'
 import CmsList from '@/components/admin/CmsList'
+import ReviewBulkUpload from '@/components/admin/ReviewBulkUpload'
 import { listRows, resources, type CmsRow } from '@/lib/cms'
 
 export default async function Page({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string; new?: string }> }) {
@@ -14,5 +15,5 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
     const matchesStatus = !status || !resource.statusKey || String(row[resource.statusKey] ?? '') === status
     return matchesSearch && matchesStatus
   })
-  return <CmsList resourceKey="reviews" resource={resource} rows={filtered} search={params?.q || ''} status={status} />
+  return <><ReviewBulkUpload /><CmsList resourceKey="reviews" resource={resource} rows={filtered} search={params?.q || ''} status={status} /></>
 }

@@ -19,6 +19,8 @@ type Pet = {
   health_notes?: string
   description?: string
   availability_status?: string
+  image_ids?: string[]
+  media?: { secure_url?: string; width?: number; height?: number; alt_text?: string }
 }
 
 type Props = { params: Promise<{ slug: string }> }
@@ -26,7 +28,13 @@ type Props = { params: Promise<{ slug: string }> }
 async function getPet(slug: string) {
   try {
     const rows = await getRows<Pet>(`pets?slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=*`, false)
-    return rows?.[0] || null
+    const pet = rows?.[0] || null
+    const imageId = pet?.image_ids?.[0]
+    if (pet && imageId) {
+      const media = await getRows<{ id: string; secure_url?: string; width?: number; height?: number; alt_text?: string }>(`media_assets?id=eq.${imageId}&select=*&limit=1`, false)
+      pet.media = media?.[0]
+    }
+    return pet
   } catch {
     return null
   }
@@ -48,7 +56,7 @@ export default async function PetPage({ params }: Props) {
     <section className="contact-section" style={{ paddingTop: '140px' }}>
       <div className="contact-container">
         <div className="contact-info">
-          <Image src="/logo.png" alt="Way2Pets pet listing" width={180} height={90} />
+          <Image src={pet.media?.secure_url || '/logo.png'} alt={pet.media?.alt_text || pet.name || 'Way2Pets pet listing'} width={pet.media?.width || 480} height={pet.media?.height || 320} style={{ maxWidth: '100%', height: 'auto', borderRadius: 16 }} />
           <h1>{pet.name}</h1>
           <p>{pet.breed} · {pet.age} · {pet.gender}</p>
           <p>Status: {pet.availability_status || 'available'}</p>
