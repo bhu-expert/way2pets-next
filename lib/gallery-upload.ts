@@ -16,6 +16,7 @@ export type GalleryUploadDeps = {
   isAllowedAdmin: (email?: string | null) => boolean
   uploadToCloudinary: (file: File, category: string) => Promise<CloudinaryUpload>
   insertRow: <T>(table: string, body: Record<string, unknown>) => Promise<T[] | null>
+  deleteRows?: (tableWithFilter: string) => Promise<unknown>
   logger?: Pick<Console, 'error'>
 }
 export type GalleryUploadResult = { status: number; body: Record<string, unknown> }
@@ -107,7 +108,11 @@ export function buildGalleryImagePayload(assetId: string, form: ReturnType<typeo
 }
 
 export function readableSupabaseDetails(error: unknown, table: string, payload?: Record<string, unknown>) {
-  const base = { table, payloadKeys: payload ? Object.keys(payload).sort() : [] }
+  const base = {
+    table,
+    payloadKeys: payload ? Object.keys(payload).sort() : [],
+    media_asset_id: payload?.media_asset_id ? String(payload.media_asset_id) : undefined,
+  }
   if (error && typeof error === 'object') {
     const maybe = error as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown; status?: unknown; body?: unknown }
     return {
@@ -123,10 +128,6 @@ export function readableSupabaseDetails(error: unknown, table: string, payload?:
   return { ...base, message: String(error) }
 }
 
-function isMissingSubcategoryColumn(details: { message?: string; code?: unknown; details?: unknown; hint?: unknown; body?: unknown }) {
-  const haystack = [details.message, details.details, details.hint, details.body].map((value) => String(value || '')).join(' ')
-  return /subcategory/i.test(haystack) && (/schema cache/i.test(haystack) || details.code === 'PGRST204' || details.code === '42703')
-}
 
 function success(body: Record<string, unknown>, status = 200): GalleryUploadResult {
   return { status, body: { success: true, ...body } }
@@ -134,6 +135,15 @@ function success(body: Record<string, unknown>, status = 200): GalleryUploadResu
 
 function failure(message: string, status: number, details?: unknown): GalleryUploadResult {
   return { status, body: { success: false, message, details } }
+}
+
+function supabaseErrorText(details: { code?: unknown; message?: unknown; details?: unknown; hint?: unknown }) {
+  return [
+    details.code ? `code ${String(details.code)}` : '',
+    details.message ? String(details.message) : '',
+    details.details ? `details: ${String(details.details)}` : '',
+    details.hint ? `hint: ${String(details.hint)}` : '',
+  ].filter(Boolean).join(' | ') || 'unknown Supabase error'
 }
 
 export async function handleGalleryUpload(req: Request & { cookies?: { get: (name: string) => { value?: string } | undefined } }, deps: GalleryUploadDeps): Promise<GalleryUploadResult> {
@@ -192,10 +202,17 @@ export async function handleGalleryUpload(req: Request & { cookies?: { get: (nam
     } catch (error) {
       const details = readableSupabaseDetails(error, 'gallery_images', galleryPayload)
       logger.error('Gallery gallery_images insert failed.', details)
-      if (isMissingSubcategoryColumn(details)) {
-        return failure('Gallery image insert failed: missing subcategory column on gallery_images. Run the gallery subcategory migration and reload the Supabase schema cache.', 500, details)
+
+      if (deps.deleteRows) {
+        try {
+          await deps.deleteRows(`media_assets?id=eq.${encodeURIComponent(assetId)}`)
+          logger.error('Deleted orphan media_assets row after gallery_images insert failure.', { media_asset_id: assetId })
+        } catch (cleanupError) {
+          logger.error('Failed to delete orphan media_assets row after gallery_images insert failure.', readableSupabaseDetails(cleanupError, 'media_assets', { id: assetId }))
+        }
       }
-      return failure('gallery_images insert failed.', 500, details)
+
+      return failure(`media_assets created but gallery_images insert failed: ${supabaseErrorText(details)}`, 500, details)
     }
   }
 

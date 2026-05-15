@@ -93,6 +93,13 @@ export async function updateRows<T>(tableWithFilter: string, body: Json, service
   })
 }
 
+export async function deleteRows(tableWithFilter: string, serviceRole = true) {
+  return supabaseRest<null>(tableWithFilter, {
+    method: 'DELETE',
+    serviceRole,
+  })
+}
+
 export async function upsertRows<T>(tableWithQuery: string, body: Json, serviceRole = true) {
   return supabaseRest<T[]>(tableWithQuery, {
     method: 'POST',

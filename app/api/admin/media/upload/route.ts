@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { adminCookieName } from '@/lib/admin'
 import { signCloudinaryParams } from '@/lib/cloudinary'
 import { handleGalleryUpload, type CloudinaryUpload } from '@/lib/gallery-upload'
-import { getAuthUser, insertRow, isAllowedAdmin } from '@/lib/supabase'
+import { deleteRows, getAuthUser, insertRow, isAllowedAdmin } from '@/lib/supabase'
 
 async function uploadToCloudinary(file: File, category: string): Promise<CloudinaryUpload> {
   const timestamp = Math.round(Date.now() / 1000)
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     isAllowedAdmin,
     uploadToCloudinary,
     insertRow: (table, body) => insertRow(table, body, true),
+    deleteRows: (tableWithFilter) => deleteRows(tableWithFilter, true),
     logger: console,
   })
 
