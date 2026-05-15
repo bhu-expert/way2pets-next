@@ -1,12 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useI18n } from '@/src/i18n'
 
 export default function RegisterForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const { t } = useI18n()
+
+  useEffect(() => {
+    fetch('/api/account/me')
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        const profile = data?.profile
+        if (!profile) return
+        const form = document.querySelector('form[data-way2pets-form=register]') as HTMLFormElement | null
+        if (!form) return
+        ;(form.elements.namedItem('ownerName') as HTMLInputElement | null)?.setAttribute('value', String(profile.full_name || ''))
+        ;(form.elements.namedItem('phone') as HTMLInputElement | null)?.setAttribute('value', String(profile.mobile || ''))
+        ;(form.elements.namedItem('email') as HTMLInputElement | null)?.setAttribute('value', String(profile.email || ''))
+        ;(form.elements.namedItem('address') as HTMLTextAreaElement | null)!.value = String(profile.address || profile.city || '')
+      })
+      .catch(() => {})
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -46,7 +62,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} data-way2pets-form="register">
       <h3 style={{ marginBottom: '20px', color: 'var(--primary-green)', borderBottom: '2px solid var(--accent-orange)', display: 'inline-block' }}>
         {t.registerForm.ownerDetails}
       </h3>
@@ -100,7 +116,7 @@ export default function RegisterForm() {
         {status === 'loading' ? t.registerForm.registering : t.registerForm.submit}
       </button>
       {status === 'success' && (
-        <p className="form-message success">{t.registerForm.success}</p>
+        <p className="form-message success">Your request has been submitted. Create/login to your Way2Pets account with the same email to view and manage your request.</p>
       )}
       {status === 'error' && (
         <p className="form-message error">{errorMsg}</p>

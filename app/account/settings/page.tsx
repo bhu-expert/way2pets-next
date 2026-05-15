@@ -1,0 +1,1 @@
+export default function SettingsPage() { return <><h1>Account Settings</h1><p>Password changes are handled through the <a href="/forgot-password">forgot password</a> flow. Email changes are not enabled from the portal yet for security.</p><form action="/api/auth/logout" method="post"><button className="btn btn-primary">Logout</button></form></> }

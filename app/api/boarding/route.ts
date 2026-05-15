@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendAdminEmail } from '@/lib/email'
+import { getCurrentUser } from '@/lib/user-auth'
 import { insertRow } from '@/lib/supabase'
+import { notifyPublicForm } from '@/lib/server/notifications'
 import { validateBoarding } from '@/lib/validation'
 
 export async function POST(req: NextRequest) {
   const payload = await req.json()
   const parsed = validateBoarding(payload)
   if (!parsed.ok) return NextResponse.json({ success: false, message: parsed.message }, { status: 400 })
+  const user = await getCurrentUser()
+  const data = { ...parsed.data, user_id: user?.id || null, owner_email: parsed.data.email, owner_mobile: parsed.data.mobile, editable_by_user: true }
 
-  try { await insertRow('boarding_bookings', parsed.data) }
+  try { await insertRow('boarding_bookings', data) }
   catch (error) {
     console.error('Error saving boarding request:', error)
     return NextResponse.json({ success: false, message: 'Failed to save booking request.' }, { status: 500 })
   }
 
-  try { await sendAdminEmail(`New Boarding Request: ${parsed.data.pet_name}`, `Form type: Boarding booking\nSubmitted: ${new Date().toISOString()}\nName: ${parsed.data.owner_name}\nMobile: ${parsed.data.mobile}\nWhatsApp: ${parsed.data.whatsapp || 'N/A'}\nEmail: ${parsed.data.email || 'N/A'}\nSource: ${payload.source_page || payload.sourcePage || 'boarding form'}\n\nAll fields:\n${JSON.stringify(parsed.data, null, 2)}`) }
-  catch (error) { console.error('Boarding email failed:', error) }
+  await notifyPublicForm({ formType: 'Boarding booking', sourcePage: payload.source_page || payload.sourcePage || 'boarding form', userEmail: parsed.data.email, userMobile: parsed.data.mobile, userId: user?.id, adminLink: '/admin/bookings', fields: data })
 
-  return NextResponse.json({ success: true, message: 'Booking request sent successfully!' })
+  return NextResponse.json({ success: true, message: 'Your request has been submitted. Create/login to your Way2Pets account with the same email to view and manage your request.' })
 }

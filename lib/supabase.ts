@@ -31,8 +31,8 @@ export class SupabaseRestError extends Error {
   }
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export function hasSupabaseConfig(serviceRole = false) {
@@ -124,7 +124,7 @@ export async function signInWithPassword(email: string, password: string) {
   })
 
   if (!res.ok) {
-    throw new Error('Invalid admin login.')
+    throw new Error('Invalid login.')
   }
 
   return (await res.json()) as AuthSession
@@ -174,4 +174,50 @@ export function isAllowedAdmin(email?: string | null) {
 
   if (!normalizedEmail || !adminEmail) return false
   return normalizedEmail === adminEmail
+}
+
+
+export async function signUpWithPassword(email: string, password: string, metadata: Record<string, unknown> = {}) {
+  if (!hasSupabaseConfig(false)) throw new Error('Supabase auth is not configured.')
+
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+    method: 'POST',
+    headers: headers(false),
+    body: JSON.stringify({ email, password, data: metadata }),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Signup failed.')
+  }
+
+  return (await res.json()) as Partial<AuthSession> & { user?: AuthUser | null; session?: AuthSession | null }
+}
+
+export async function updateAuthPassword(accessToken: string, password: string) {
+  if (!hasSupabaseConfig(false)) throw new Error('Supabase auth is not configured.')
+
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: 'PUT',
+    headers: headers(false, accessToken),
+    body: JSON.stringify({ password }),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) throw new Error('Password update failed.')
+  return (await res.json()) as AuthUser
+}
+
+export async function sendPasswordRecovery(email: string, redirectTo: string) {
+  if (!hasSupabaseConfig(false)) throw new Error('Supabase auth is not configured.')
+
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+    method: 'POST',
+    headers: headers(false),
+    body: JSON.stringify({ email, redirect_to: redirectTo }),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) throw new Error('Could not send password reset email.')
 }

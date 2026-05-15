@@ -1125,3 +1125,17 @@ footer h2 span {
 .admin-actions a {
   display: inline-block;
 }
+
+.auth-card { max-width: 560px; margin: 0 auto; background: #fff; padding: 2rem; border-radius: 18px; box-shadow: 0 14px 40px rgba(0,0,0,.08); }
+.container.narrow { max-width: 760px; }
+.account-grid { display: grid; grid-template-columns: minmax(200px, 260px) 1fr; gap: 2rem; align-items: start; }
+.account-sidebar, .account-card { background: #fff; padding: 1.25rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+.account-sidebar { display: grid; gap: .75rem; position: sticky; top: 90px; }
+.account-sidebar a { color: var(--primary-green); font-weight: 700; }
+.stats, .quick-actions { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0 2rem; }
+.stats > div { background: var(--light-green); border-radius: 14px; padding: 1rem 1.5rem; display: grid; }
+.stats strong { font-size: 2rem; color: var(--primary-green); }
+.account-inline-form { display: grid; gap: .75rem; }
+.nav-logout { display: inline; }
+.nav-logout button { border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; font-weight: 700; }
+@media (max-width: 800px) { .account-grid { grid-template-columns: 1fr; } .account-sidebar { position: static; } }

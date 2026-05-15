@@ -15,6 +15,7 @@ const adminLinks = [
   ['/admin/gallery', 'Gallery'],
   ['/admin/reviews', 'Reviews'],
   ['/admin/leads', 'Leads'],
+  ['/admin/users', 'Users/Customers'],
   ['/admin/seo', 'SEO'],
   ['/admin/redirects', 'Redirects'],
   ['/admin/settings', 'Settings'],
