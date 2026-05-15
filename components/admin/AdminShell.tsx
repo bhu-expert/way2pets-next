@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 
 const adminLinks = [
@@ -17,17 +20,23 @@ const adminLinks = [
   ['/admin/settings', 'Settings'],
 ]
 
+function isActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
 export default function AdminShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname()
+
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <aside className="admin-sidebar" aria-label="Admin navigation">
         <Link href="/admin/dashboard" className="admin-brand">Way2Pets Admin</Link>
         <nav>
           {adminLinks.map(([href, label]) => (
-            <Link key={href} href={href}>{label}</Link>
+            <Link key={href} href={href} className={isActive(pathname, href) ? 'active' : undefined} aria-current={isActive(pathname, href) ? 'page' : undefined}>{label}</Link>
           ))}
         </nav>
-        <form action="/api/admin/logout" method="post">
+        <form action="/api/admin/logout" method="post" className="admin-logout-form">
           <button className="admin-logout" type="submit">Logout</button>
         </form>
       </aside>

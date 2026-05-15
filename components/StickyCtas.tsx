@@ -1,14 +1,18 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { localized } from '@/lib/website-content'
 import { useI18n } from '@/src/i18n'
 import { useWebsiteContent } from './WebsiteContentProvider'
 
 export default function StickyCtas() {
+  const pathname = usePathname()
   const { language, t } = useI18n()
   const content = useWebsiteContent()
   const buttons = content.items.floating_buttons || []
+
+  if (pathname.startsWith('/admin')) return null
 
   return (
     <div className="sticky-ctas" aria-label={t.common.quickActions}>

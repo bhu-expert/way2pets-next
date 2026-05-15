@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { galleryCategories } from '@/lib/taxonomy'
 
@@ -8,6 +9,7 @@ type UploadAsset = { id?: string; secure_url?: string; width?: number; height?: 
 type UploadResponse = { success?: boolean; message?: string; details?: unknown; asset?: UploadAsset }
 
 export default function GalleryUpload() {
+  const router = useRouter()
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const [asset, setAsset] = useState<UploadAsset | null>(null)
@@ -27,6 +29,7 @@ export default function GalleryUpload() {
       setAsset(json.asset || null)
       setMessage('Saved. The image is now available in Gallery Manager and the public gallery when visible is checked.')
       form.reset()
+      router.refresh()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload failed')
     } finally {

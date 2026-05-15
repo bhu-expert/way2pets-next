@@ -162,8 +162,9 @@ export const resources: Record<string, ResourceConfig> = {
   },
   gallery: {
     table: 'gallery_images', title: 'Gallery Manager', description: 'Upload Cloudinary images and control public gallery visibility.', newPath: '/admin/gallery?new=1', editPath: '/admin/gallery',
-    columns: [{ key: 'title', label: 'Title' }, { key: 'category', label: 'Category' }, { key: 'subcategory', label: 'Subcategory' }, { key: 'is_visible', label: 'Visible' }, { key: 'is_featured', label: 'Featured' }],
+    columns: [{ key: 'thumbnail', label: 'Thumbnail' }, { key: 'title', label: 'Title' }, { key: 'caption', label: 'Caption' }, { key: 'alt_text', label: 'Alt text' }, { key: 'category', label: 'Category' }, { key: 'subcategory', label: 'Subcategory' }, { key: 'is_visible', label: 'Visible' }, { key: 'is_featured', label: 'Featured' }, { key: 'sort_order', label: 'Sort order' }, { key: 'created_at', label: 'Created at' }],
     fields: [{ name: 'title', label: 'Title' }, { name: 'caption', label: 'Caption', type: 'textarea' }, { name: 'alt_text', label: 'Alt text' }, { name: 'category', label: 'Category', type: 'select', options: galleryCategories }, { name: 'subcategory', label: 'Subcategory' }, { name: 'pet_type', label: 'Pet type', type: 'select', options: petTypes }, { name: 'is_visible', label: 'Visible', type: 'checkbox' }, { name: 'is_featured', label: 'Featured', type: 'checkbox' }, { name: 'sort_order', label: 'Sort order', type: 'number' }],
-    searchKeys: ['title', 'caption', 'category', 'subcategory'], statusKey: 'is_visible', statusOptions: ['true', 'false'],
+    searchKeys: ['title', 'caption', 'alt_text', 'category', 'subcategory'], statusKey: 'is_visible', statusOptions: ['true', 'false'],
+    select: 'id,title,caption,alt_text,category,subcategory,is_visible,is_featured,sort_order,created_at,media_asset_id,media_assets(secure_url,title,alt_text,width,height)',
   },
 }
