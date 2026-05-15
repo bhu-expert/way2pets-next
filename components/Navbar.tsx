@@ -29,6 +29,8 @@ export default function Navbar() {
       .catch(() => setLoggedIn(false))
   }, [])
 
+  const authNavActive = !loggedIn && ['/login', '/signup', '/forgot-password', '/reset-password'].some((route) => pathname === route)
+
   return (
     <header>
       <nav>
@@ -71,7 +73,7 @@ export default function Navbar() {
               <form action="/api/auth/logout" method="post" className="nav-logout"><button type="submit">Logout</button></form>
             </>
           ) : (
-            <Link href="/login" onClick={() => setOpen(false)}>Login/Register</Link>
+            <Link href="/login" className={authNavActive ? 'active' : ''} onClick={() => setOpen(false)}>Login/Register</Link>
           )}
           <Link href="/contact" className="btn btn-primary" onClick={() => setOpen(false)}>
             {t.nav.contactUs}

@@ -1,2 +1,10 @@
+import AuthShell from '@/components/auth/AuthShell'
 import { ResetPasswordForm } from '@/components/auth/AuthForms'
-export default function ResetPasswordPage() { return <section className="section"><div className="container narrow"><ResetPasswordForm /></div></section> }
+
+export default function ResetPasswordPage() {
+  return (
+    <AuthShell size="login">
+      <ResetPasswordForm />
+    </AuthShell>
+  )
+}

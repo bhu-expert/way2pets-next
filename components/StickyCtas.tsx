@@ -12,7 +12,10 @@ export default function StickyCtas() {
   const content = useWebsiteContent()
   const buttons = content.items.floating_buttons || []
 
-  if (pathname.startsWith('/admin')) return null
+  const authRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/auth/callback']
+  const isAuthExperience = authRoutes.some((route) => pathname === route) || pathname.startsWith('/account')
+
+  if (pathname.startsWith('/admin') || isAuthExperience) return null
 
   return (
     <div className="sticky-ctas" aria-label={t.common.quickActions}>
