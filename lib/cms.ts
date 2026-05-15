@@ -157,7 +157,7 @@ export const resources: Record<string, ResourceConfig> = {
   settings: {
     table: 'site_settings', title: 'Site Settings', description: 'Manage NAP, social, map, default SEO and notification email values.', newPath: '/admin/settings?new=1', editPath: '/admin/settings',
     columns: [{ key: 'key', label: 'Key' }, { key: 'group_name', label: 'Group' }, { key: 'value_json', label: 'Value' }, { key: 'updated_at', label: 'Updated At' }],
-    fields: [{ name: 'key', label: 'Key', required: true }, { name: 'group_name', label: 'Group' }, { name: 'value_json', label: 'Value JSON', type: 'json', help: 'Example: {"value":"way2pets.com@gmail.com"}' }],
+    fields: [{ name: 'key', label: 'Key', required: true, help: 'Examples: phone, email, google_maps_public_url, latitude.' }, { name: 'group_name', label: 'Group' }, { name: 'value_json', label: 'Value', type: 'json', help: 'Enter the plain value. The admin saves it as {"value":"..."} automatically.' }],
     searchKeys: ['key', 'group_name'],
   },
   gallery: {

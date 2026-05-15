@@ -36,6 +36,16 @@ export async function saveCmsResource(formData: FormData) {
 
   for (const field of resource.fields) {
     if (field.type === 'hidden') continue
+    if (resourceKey === 'settings' && field.name === 'value_json') {
+      const raw = String(formData.get(field.name) || '').trim()
+      if (field.required && !raw) throw new Error(`${field.label} is required.`)
+      if (formData.get('_value_json_mode') === 'json') {
+        try { body[field.name] = raw ? JSON.parse(raw) : {} } catch { throw new Error(`${field.label} must be valid JSON.`) }
+      } else {
+        body[field.name] = { value: raw }
+      }
+      continue
+    }
     const value = parseValue(field, formData)
     if (field.required && (value === null || value === '')) throw new Error(`${field.label} is required.`)
     if (value !== null || field.type === 'checkbox') body[field.name] = value
