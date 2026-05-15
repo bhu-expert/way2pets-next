@@ -16,13 +16,13 @@ type GalleryRow = {
   caption?: string
   category?: string
   subcategory?: string
-  media_assets?: { secure_url?: string; width?: number; height?: number; alt_text?: string }
+  media_assets?: { secure_url?: string; width?: number; height?: number; alt_text?: string; title?: string }
 }
 
 export default async function GalleryPage() {
   let rows: GalleryRow[] = []
   try {
-    rows = await getRows<GalleryRow>('gallery_images?is_visible=eq.true&select=*,media_assets(*)', false) || []
+    rows = await getRows<GalleryRow>('gallery_images?is_visible=eq.true&select=id,title,alt_text,caption,category,subcategory,sort_order,media_assets(secure_url,width,height,alt_text,title)&order=sort_order.asc,created_at.desc', false) || []
   } catch {}
 
   return <GalleryPageContent rows={rows} />

@@ -810,7 +810,7 @@ footer h2 span {
 .admin-login-card { max-width: 440px; width: 100%; }
 .admin-form { display: grid; gap: 12px; margin-top: 20px; }
 .admin-shell { display: flex; min-height: 100vh; padding-top: 90px; background: #f6f8f6; }
-.admin-sidebar { width: 270px; padding: 24px; background: #173b1a; color: white; position: sticky; top: 90px; height: calc(100vh - 90px); overflow-y: auto; }
+.admin-sidebar { width: 270px; padding: 24px; background: #173b1a; color: white; position: sticky; top: 90px; height: calc(100vh - 90px); overflow-y: auto; display: flex; flex-direction: column; }
 .admin-brand { display: block; font-weight: 800; font-size: 1.3rem; margin-bottom: 24px; }
 .admin-sidebar nav { display: grid; gap: 6px; }
 .admin-sidebar a, .admin-logout { color: white; padding: 10px 12px; border-radius: 10px; background: transparent; border: 0; text-align: left; font: inherit; cursor: pointer; }
@@ -1075,4 +1075,53 @@ footer h2 span {
 }
 @media (max-width: 768px) {
   .admin-image-field { grid-template-columns: 1fr; }
+}
+
+.admin-sidebar nav a.active,
+.admin-sidebar nav a[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.18);
+  font-weight: 800;
+}
+
+.admin-logout-form {
+  margin-top: auto;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-gallery-table {
+  min-width: 1180px;
+}
+
+.admin-gallery-table td {
+  vertical-align: middle;
+}
+
+.admin-gallery-thumb-link {
+  display: inline-flex;
+  width: 100px;
+  height: 80px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d8e6d9;
+  border-radius: 10px;
+  background: #f8fbf8;
+  overflow: hidden;
+}
+
+.admin-gallery-thumb {
+  width: 100px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.admin-muted {
+  color: var(--light-text);
+  font-size: 0.9rem;
+}
+
+.admin-actions a {
+  display: inline-block;
 }

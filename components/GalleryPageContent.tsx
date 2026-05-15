@@ -11,11 +11,11 @@ type GalleryRow = {
   caption?: string
   category?: string
   subcategory?: string
-  media_assets?: { secure_url?: string; width?: number; height?: number; alt_text?: string }
+  media_assets?: { secure_url?: string; width?: number; height?: number; alt_text?: string; title?: string }
 }
 
 function galleryAlt(row: GalleryRow) {
-  return row.alt_text || row.media_assets?.alt_text || row.title || 'Way2Pets gallery image'
+  return row.alt_text || row.media_assets?.alt_text || row.title || row.media_assets?.title || 'Way2Pets gallery image'
 }
 
 export default function GalleryPageContent({ rows }: { rows: GalleryRow[] }) {
@@ -56,7 +56,7 @@ export default function GalleryPageContent({ rows }: { rows: GalleryRow[] }) {
           rows.map((row) => {
             const imageUrl = row.media_assets?.secure_url
             const alt = galleryAlt(row)
-            const title = row.title || alt
+            const title = row.title || row.media_assets?.title || alt
             const category = [row.category, row.subcategory].filter(Boolean).join(' / ')
 
             return (
@@ -122,7 +122,7 @@ export default function GalleryPageContent({ rows }: { rows: GalleryRow[] }) {
               />
             </div>
             <div className="gallery-lightbox-copy">
-              <h2 id="gallery-lightbox-title">{activeImage.title || galleryAlt(activeImage)}</h2>
+              <h2 id="gallery-lightbox-title">{activeImage.title || activeImage.media_assets?.title || galleryAlt(activeImage)}</h2>
               {activeImage.caption ? <p>{activeImage.caption}</p> : null}
               <span>Alt text: {galleryAlt(activeImage)}</span>
             </div>
