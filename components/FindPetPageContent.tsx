@@ -4,9 +4,21 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Hero from '@/components/Hero'
 import FindPetForm from '@/components/FindPetForm'
+import { mediaKind, petMediaAlt, petMediaPoster, pickPetThumbnail, type PetMedia } from '@/lib/pet-media'
 import { useI18n } from '@/src/i18n'
 
-type Pet = { id: string; name: string; slug: string; pet_type: string; breed?: string; age?: string; availability_status?: string; description?: string; image_ids?: string[]; media?: { secure_url?: string; width?: number; height?: number; alt_text?: string } }
+type Pet = { id: string; name: string; slug: string; pet_type: string; breed?: string; age?: string; listing_type?: string; price?: number; location?: string; availability_status?: string; description?: string; media_items?: PetMedia[] }
+
+function PetCardMedia({ pet }: { pet: Pet }) {
+  const media = pickPetThumbnail(pet)
+  const asset = media?.media_assets
+  const poster = petMediaPoster(media)
+  if (!media || !asset?.secure_url) return <div className="pet-card-placeholder">No image</div>
+  if (mediaKind(media) === 'video') {
+    return poster ? <Image className="blog-img pet-card-img" src={poster} alt={petMediaAlt(pet, media)} width={asset.width || 900} height={asset.height || 600} /> : <div className="pet-card-placeholder">Video</div>
+  }
+  return <Image className="blog-img pet-card-img" src={asset.secure_url} alt={petMediaAlt(pet, media)} width={asset.width || 900} height={asset.height || 600} />
+}
 
 export default function FindPetPageContent({ pets }: { pets: Pet[] }) {
   const { t } = useI18n()
@@ -32,11 +44,13 @@ export default function FindPetPageContent({ pets }: { pets: Pet[] }) {
             <article className="blog-card"><div className="blog-content"><h3 className="blog-title">{t.findPet.emptyTitle}</h3><p>{t.findPet.emptyText}</p></div></article>
           ) : pets.map((pet) => (
             <article key={pet.id} className="blog-card">
-              {pet.media?.secure_url ? <Image className="blog-img" src={pet.media.secure_url} alt={pet.media.alt_text || pet.name} width={pet.media.width || 900} height={pet.media.height || 600} /> : null}
+              <PetCardMedia pet={pet} />
               <div className="blog-content">
-                <span className="blog-date">{pet.pet_type} · {pet.availability_status || t.common.available}</span>
+                <span className="blog-date">{pet.pet_type} · {pet.listing_type || 'listing'} · {pet.availability_status || t.common.available}</span>
                 <h3 className="blog-title">{pet.name}</h3>
-                <p>{pet.breed} {pet.age ? `· ${pet.age}` : ''}</p><p>{pet.description}</p>
+                <p>{pet.breed} {pet.age ? `· ${pet.age}` : ''}</p>
+                {pet.listing_type === 'sale' && pet.price ? <p><strong>₹{Number(pet.price).toLocaleString('en-IN')}</strong></p> : null}
+                <p>{pet.description}</p>
                 <Link href={`/pets/${pet.slug}`} style={{ color: 'var(--accent-orange)', fontWeight: 600 }}>{t.common.viewPet} →</Link>
               </div>
             </article>

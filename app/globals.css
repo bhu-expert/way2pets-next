@@ -1397,3 +1397,191 @@ body {
     padding: 22px 18px;
   }
 }
+
+.admin-alert {
+  border-radius: 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+}
+.admin-alert-warning {
+  background: #fff8e5;
+  border: 1px solid #ffd27a;
+  color: #6b4100;
+}
+.admin-checkbox {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+.admin-checkbox input { width: auto; }
+.admin-danger-check { color: #a32929; }
+.admin-pets-table { min-width: 1320px; }
+.admin-pets-table td { vertical-align: middle; }
+.admin-pet-thumb-img,
+.admin-pet-thumb-placeholder {
+  align-items: center;
+  background: #f8fbf8;
+  border: 1px solid #d8e6d9;
+  border-radius: 10px;
+  color: var(--light-text);
+  display: flex;
+  height: 80px;
+  justify-content: center;
+  object-fit: contain;
+  width: 100px;
+}
+.pet-media-section {
+  border: 1px solid #d8e6d9;
+  border-radius: 16px;
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+.pet-media-section-header p,
+.pet-media-upload-box small,
+.pet-media-card small,
+.pet-media-selected {
+  color: var(--light-text);
+}
+.pet-media-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.pet-media-card {
+  border: 1px solid #e3ece4;
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+.pet-media-preview {
+  align-items: center;
+  background: #f8fbf8;
+  border-radius: 12px;
+  display: flex;
+  height: 170px;
+  justify-content: center;
+  overflow: hidden;
+}
+.pet-media-preview video,
+.pet-media-image {
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+.pet-media-placeholder,
+.pet-media-empty,
+.pet-card-placeholder,
+.pet-detail-placeholder {
+  align-items: center;
+  background: #f8fbf8;
+  border: 1px dashed #bfd3c0;
+  border-radius: 12px;
+  color: var(--light-text);
+  display: flex;
+  justify-content: center;
+  min-height: 160px;
+  padding: 20px;
+}
+.pet-media-card-title {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+.pet-media-badge {
+  background: var(--accent-orange);
+  border-radius: 999px;
+  color: white;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+.pet-media-upload-box {
+  background: #f8fbf8;
+  border-radius: 14px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+.pet-card-img { object-fit: contain; background: #f8fbf8; }
+.pet-detail-container { align-items: flex-start; }
+.pet-detail-media-featured,
+.pet-detail-media-thumb { margin: 0; }
+.pet-detail-media-featured video,
+.pet-detail-media-featured .pet-detail-image {
+  background: #f8fbf8;
+  border-radius: 16px;
+  max-height: 520px;
+  object-fit: contain;
+  width: 100%;
+}
+.pet-detail-media-featured video { height: auto; }
+.pet-detail-gallery {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  margin-top: 14px;
+}
+.pet-detail-media-thumb video,
+.pet-detail-media-thumb .pet-detail-image {
+  background: #f8fbf8;
+  border-radius: 12px;
+  height: 120px;
+  object-fit: contain;
+  width: 100%;
+}
+.pet-detail-image-button {
+  background: transparent;
+  border: 0;
+  cursor: zoom-in;
+  padding: 0;
+  width: 100%;
+}
+.pet-detail-media-featured figcaption,
+.pet-detail-media-thumb figcaption {
+  color: var(--light-text);
+  display: grid;
+  font-size: .9rem;
+  gap: 2px;
+  margin-top: 8px;
+}
+.pet-lightbox {
+  align-items: center;
+  background: rgba(0,0,0,.82);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  padding: 24px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 2000;
+}
+.pet-lightbox-image {
+  max-height: 90vh;
+  max-width: 92vw;
+  object-fit: contain;
+  width: auto;
+}
+.pet-lightbox-close {
+  background: white;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 2rem;
+  height: 44px;
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  width: 44px;
+}
+
+@media (max-width: 768px) {
+  .admin-page-header { flex-direction: column; }
+  .pet-media-grid { grid-template-columns: 1fr; }
+  .pet-detail-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
