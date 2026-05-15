@@ -6,6 +6,7 @@ import { requireAdmin } from './admin'
 import { deleteRow, resources, type FieldConfig } from './cms'
 import { sanitizeHtml } from './html'
 import { buildBlogPath, toPetType } from './taxonomy'
+import { importReviewRows } from './review-bulk-import'
 import { insertRow, updateRows } from './supabase'
 
 const allowedTables = new Set(Object.values(resources).map((resource) => resource.table))
@@ -126,21 +127,11 @@ export async function savePetWithImages(formData: FormData) {
 
 export async function bulkImportReviews(rows: Array<Record<string, string>>) {
   await requireAdmin()
-  const valid: Record<string, unknown>[] = []
-  const errors: string[] = []
-  rows.forEach((row, index) => {
-    const reviewer_name = row.reviewer_name?.trim()
-    const rating = Number(row.rating)
-    const review_text = row.review_text?.trim()
-    if (!reviewer_name) errors.push(`Row ${index + 1}: reviewer_name is required.`)
-    if (!rating || rating < 1 || rating > 5) errors.push(`Row ${index + 1}: rating must be 1-5.`)
-    if (!review_text) errors.push(`Row ${index + 1}: review_text is required.`)
-    if (reviewer_name && rating >= 1 && rating <= 5 && review_text) valid.push({ reviewer_name, rating, review_text, source: row.source || 'Manual', source_url: row.source_url || null, reviewed_at: row.reviewed_at || null, status: row.status || 'published', is_featured: ['true', '1', 'yes', 'on'].includes(String(row.is_featured || '').toLowerCase()) })
-  })
-  if (valid.length) await insertRow('reviews', valid)
+  const result = await importReviewRows(rows, 'server-action')
   revalidatePath('/admin/reviews')
   revalidatePath('/reviews')
-  return { imported: valid.length, failed: errors.length, errors }
+  revalidatePath('/')
+  return result
 }
 
 export async function saveWebsiteContent(formData: FormData) {

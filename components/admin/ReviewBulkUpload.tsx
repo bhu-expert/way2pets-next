@@ -1,46 +1,117 @@
 'use client'
 
-import { useState } from 'react'
-import { bulkImportReviews } from '@/lib/admin-actions'
+import { useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { reviewBulkUploadHeaders, reviewBulkUploadSampleCsv, type ReviewBulkImportResult } from '@/lib/review-bulk-upload-shared'
 
-const headers = ['reviewer_name', 'rating', 'review_text', 'source', 'source_url', 'reviewed_at', 'status', 'is_featured']
-const sample = `${headers.join(',')}\nTest Customer,5,"Way2Pets took great care of my dog.",Google,https://example.com,2026-05-11,published,true\n`
+const uploadEndpoint = '/api/admin/reviews/bulk-upload'
 
-function parseCsv(text: string) {
-  const lines = text.trim().split(/\r?\n/)
-  const cols = lines.shift()?.split(',').map((h) => h.trim()) || []
-  return lines.map((line) => {
-    const values = line.match(/("[^"]*(?:""[^"]*)*"|[^,]+)/g)?.map((value) => value.replace(/^"|"$/g, '').replaceAll('""', '"').trim()) || []
-    return Object.fromEntries(cols.map((col, index) => [col, values[index] || '']))
-  })
-}
+type ImportState = ReviewBulkImportResult & { error?: string }
 
 export default function ReviewBulkUpload() {
-  const [rows, setRows] = useState<Array<Record<string, string>>>([])
-  const [message, setMessage] = useState('')
+  const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFileName, setSelectedFileName] = useState('')
+  const [result, setResult] = useState<ImportState | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
 
-  async function load(file?: File) {
-    if (!file) return
-    if (!file.name.endsWith('.csv')) { setMessage('Please upload CSV. Excel can be exported to CSV first.'); return }
-    const parsed = parseCsv(await file.text())
-    setRows(parsed)
-    setMessage(`${parsed.length} rows ready for preview/import.`)
-  }
+  async function importFile() {
+    const file = fileInputRef.current?.files?.[0]
+    if (!file) {
+      setResult({ totalRows: 0, imported: 0, failed: 0, errors: [], error: 'Please choose a CSV or Excel file first.' })
+      return
+    }
 
-  async function importRows() {
-    const result = await bulkImportReviews(rows)
-    setMessage(`Imported ${result.imported}. Failed ${result.failed}.${result.errors.length ? ` ${result.errors.join(' ')}` : ''}`)
-    if (!result.errors.length) setRows([])
+    setIsImporting(true)
+    setResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const response = await fetch(uploadEndpoint, { method: 'POST', body: formData })
+      const payload = await response.json()
+
+      if (!response.ok) {
+        setResult({ totalRows: 0, imported: 0, failed: 0, errors: [], error: payload.error || 'Bulk import failed.' })
+        return
+      }
+
+      setResult(payload)
+      if (payload.imported > 0) {
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        setSelectedFileName('')
+        router.refresh()
+      }
+    } catch (error) {
+      setResult({ totalRows: 0, imported: 0, failed: 0, errors: [], error: error instanceof Error ? error.message : 'Bulk import failed.' })
+    } finally {
+      setIsImporting(false)
+    }
   }
 
   return (
-    <div className="admin-panel">
-      <h2>Bulk upload reviews from CSV</h2>
-      <p>CSV columns: {headers.join(', ')}. Export Excel files to CSV before upload.</p>
-      <a className="admin-button" download="way2pets-reviews-template.csv" href={`data:text/csv;charset=utf-8,${encodeURIComponent(sample)}`}>Download CSV template</a>
-      <input type="file" accept=".csv,text/csv" onChange={(event) => load(event.target.files?.[0])} />
-      {rows.length > 0 && <><h3>Preview first 5 rows</h3><pre>{JSON.stringify(rows.slice(0, 5), null, 2)}</pre><button className="admin-button" type="button" onClick={importRows}>Import valid rows</button></>}
-      {message && <p>{message}</p>}
-    </div>
+    <section className="admin-panel">
+      <div className="admin-page-header">
+        <div>
+          <h2>Bulk Upload Reviews</h2>
+          <p>Upload one review per row from the same CSV/Excel template used below. Imports run server-side with admin credentials.</p>
+        </div>
+      </div>
+
+      <div className="admin-form-actions">
+        <a className="admin-button" download="way2pets-reviews-template.csv" href={`data:text/csv;charset=utf-8,${encodeURIComponent(reviewBulkUploadSampleCsv)}`}>Download Sample CSV</a>
+        <a className="admin-button" href={`${uploadEndpoint}?format=xlsx`}>Download Sample Excel</a>
+      </div>
+
+      <p><strong>Expected columns:</strong> {reviewBulkUploadHeaders.join(', ')}</p>
+      <p><small>Supported uploads: .csv and .xlsx. Legacy .xls files are not supported yet.</small></p>
+
+      <div className="admin-form-grid">
+        <label className="admin-field-wide">
+          <span>Review file</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            disabled={isImporting}
+            onChange={(event) => {
+              setSelectedFileName(event.target.files?.[0]?.name || '')
+              setResult(null)
+            }}
+          />
+          {selectedFileName && <small>Selected: {selectedFileName}</small>}
+        </label>
+        <div className="admin-field-wide admin-form-actions">
+          <button className="admin-button" type="button" onClick={importFile} disabled={isImporting}>
+            {isImporting ? 'Importing…' : 'Upload and Import Reviews'}
+          </button>
+        </div>
+      </div>
+
+      {result && (
+        <div aria-live="polite">
+          {result.error ? (
+            <p><strong>Import failed:</strong> {result.error}</p>
+          ) : (
+            <>
+              <h3>Import result</h3>
+              <ul>
+                <li>Total rows found: {result.totalRows}</li>
+                <li>Imported successfully: {result.imported}</li>
+                <li>Failed: {result.failed}</li>
+              </ul>
+              {result.errors.length > 0 && (
+                <div>
+                  <h4>Row errors</h4>
+                  <ul>
+                    {result.errors.map((error) => <li key={error}>{error}</li>)}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </section>
   )
 }
