@@ -1,10 +1,17 @@
 import { notFound } from 'next/navigation'
 import PetEditor from '@/components/admin/PetEditor'
 import { getRow, type CmsRow } from '@/lib/cms'
+import { attachPetMedia, type PetMedia } from '@/lib/pet-media'
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+type PageProps = { params: Promise<{ id: string }>; searchParams?: Promise<{ media_error?: string }> }
+
+type PetAdminRow = CmsRow & { media_items?: PetMedia[] }
+
+export default async function Page({ params, searchParams }: PageProps) {
   const { id } = await params
-  const row = await getRow<CmsRow>('pets', id, '*')
+  const query = await searchParams
+  const row = await getRow<PetAdminRow>('pets', id, '*')
   if (!row) notFound()
-  return <PetEditor row={row} />
+  const [withMedia] = await attachPetMedia([row], true)
+  return <PetEditor row={withMedia} mediaError={query?.media_error} />
 }

@@ -9,6 +9,9 @@ export type CloudinaryUpload = {
   format?: string
   resource_type?: string
   bytes?: number
+  media_type?: string
+  duration?: number
+  thumbnail_url?: string
 }
 export type GalleryUploadDeps = {
   adminCookieName: string
@@ -84,6 +87,9 @@ export function buildMediaAssetPayload(uploaded: CloudinaryUpload, form: ReturnT
     height: uploaded.height ?? null,
     format: uploaded.format ?? null,
     resource_type: uploaded.resource_type || 'image',
+    media_type: uploaded.media_type || uploaded.resource_type || 'image',
+    duration: uploaded.duration ?? null,
+    thumbnail_url: uploaded.thumbnail_url || uploaded.secure_url || null,
     bytes: uploaded.bytes ?? null,
     alt_text: form.altText || null,
     title: form.title || null,
