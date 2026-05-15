@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { languages, useI18n } from '@/src/i18n'
 
 const navLinks = [
@@ -19,7 +19,15 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
   const { language, setLanguage, t } = useI18n()
+
+  useEffect(() => {
+    fetch('/api/account/me')
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => setLoggedIn(Boolean(data?.user)))
+      .catch(() => setLoggedIn(false))
+  }, [])
 
   return (
     <header>
@@ -57,6 +65,14 @@ export default function Navbar() {
               </button>
             ))}
           </div>
+          {loggedIn ? (
+            <>
+              <Link href="/account" onClick={() => setOpen(false)}>My Account</Link>
+              <form action="/api/auth/logout" method="post" className="nav-logout"><button type="submit">Logout</button></form>
+            </>
+          ) : (
+            <Link href="/login" onClick={() => setOpen(false)}>Login/Register</Link>
+          )}
           <Link href="/contact" className="btn btn-primary" onClick={() => setOpen(false)}>
             {t.nav.contactUs}
           </Link>

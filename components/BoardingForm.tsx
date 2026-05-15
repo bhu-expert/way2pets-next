@@ -1,12 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useI18n } from '@/src/i18n'
 
 export default function BoardingForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const { t } = useI18n()
+
+  useEffect(() => {
+    fetch('/api/account/me')
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        const profile = data?.profile
+        if (!profile) return
+        const form = document.querySelector('form[data-way2pets-form=boarding]') as HTMLFormElement | null
+        if (!form) return
+        ;(form.elements.namedItem('boardingOwnerName') as HTMLInputElement | null)?.setAttribute('value', String(profile.full_name || ''))
+        ;(form.elements.namedItem('boardingContact') as HTMLInputElement | null)?.setAttribute('value', String(profile.mobile || ''))
+        ;(form.elements.namedItem('boardingWhatsApp') as HTMLInputElement | null)?.setAttribute('value', String(profile.whatsapp || ''))
+        ;(form.elements.namedItem('boardingEmail') as HTMLInputElement | null)?.setAttribute('value', String(profile.email || ''))
+        ;(form.elements.namedItem('boardingCity') as HTMLInputElement | null)?.setAttribute('value', String(profile.city || ''))
+      })
+      .catch(() => {})
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -17,6 +34,7 @@ export default function BoardingForm() {
       mobile: (form.elements.namedItem('boardingContact') as HTMLInputElement).value,
       whatsapp: (form.elements.namedItem('boardingWhatsApp') as HTMLInputElement).value,
       city: (form.elements.namedItem('boardingCity') as HTMLInputElement).value,
+      email: (form.elements.namedItem('boardingEmail') as HTMLInputElement).value,
       petType: (form.elements.namedItem('boardingPetType') as HTMLSelectElement).value,
       breed: (form.elements.namedItem('boardingBreed') as HTMLInputElement).value,
       petName: (form.elements.namedItem('boardingPetName') as HTMLInputElement).value,
@@ -54,7 +72,7 @@ export default function BoardingForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} data-way2pets-form="boarding">
       <div className="form-group">
         <label>{t.boardingForm.ownerName}</label>
         <input type="text" name="boardingOwnerName" className="form-input" placeholder={t.boardingForm.ownerNamePlaceholder} required />
@@ -107,6 +125,10 @@ export default function BoardingForm() {
         <textarea name="boardingInstructions" className="form-input" rows={2} />
       </div>
       <div className="form-group">
+        <label>Email</label>
+        <input type="email" name="boardingEmail" className="form-input" placeholder="you@example.com" required />
+      </div>
+      <div className="form-group">
         <label>{t.boardingForm.mobile}</label>
         <input type="tel" name="boardingContact" className="form-input" placeholder="+91..." required />
       </div>
@@ -122,7 +144,7 @@ export default function BoardingForm() {
         {status === 'loading' ? t.boardingForm.submitting : t.boardingForm.submit}
       </button>
       {status === 'success' && (
-        <p className="form-message success">{t.boardingForm.success}</p>
+        <p className="form-message success">Your request has been submitted. Create/login to your Way2Pets account with the same email to view and manage your request.</p>
       )}
       {status === 'error' && (
         <p className="form-message error">{errorMsg}</p>

@@ -34,6 +34,7 @@ export default function AdminLoginForm() {
       <button className="btn btn-primary" type="submit" disabled={status === 'loading'}>
         {status === 'loading' ? 'Signing in...' : 'Sign In'}
       </button>
+      <a href="/forgot-password">Forgot password?</a>
       {status === 'error' && <p className="form-message error">{message}</p>}
     </form>
   )
