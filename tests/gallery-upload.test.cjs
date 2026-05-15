@@ -57,6 +57,7 @@ function deps(overrides = {}) {
     isAllowedAdmin: (email) => email === 'admin@example.com',
     uploadToCloudinary: async () => ({ public_id: 'way2pets/blog/dog', secure_url: 'https://res.cloudinary.com/demo/image/upload/dog.jpg', width: 900, height: 600, format: 'jpg', resource_type: 'image', bytes: 123 }),
     insertRow: async (table, body) => [{ id: table === 'media_assets' ? 'asset-1' : 'gallery-1', ...body }],
+    deleteRows: async () => null,
     logger: { error() {} },
     ...overrides,
   }
@@ -102,8 +103,9 @@ test('Gallery upload API handles media_assets insert failure', async () => withC
 test('Gallery upload API handles gallery_images insert failure', async () => withCloudinaryEnv(async () => {
   const result = await handleGalleryUpload(request(galleryForm()), deps({ insertRow: async (table, body) => { if (table === 'gallery_images') throw Object.assign(new Error('violates foreign key'), { code: '23503' }); return [{ id: 'asset-1', ...body }] } }))
   assert.equal(result.status, 500)
-  assert.equal(result.body.message, 'gallery_images insert failed.')
+  assert.match(result.body.message, /media_assets created but gallery_images insert failed: code 23503/)
   assert.equal(result.body.details.code, '23503')
+  assert.equal(result.body.details.media_asset_id, 'asset-1')
 }))
 
 
@@ -138,15 +140,31 @@ test('Gallery upload API saves filled optional subcategory', async () => withClo
   assert.equal(calls[1].body.subcategory, 'dog-health')
 }))
 
-test('Gallery upload API returns actionable missing subcategory schema cache error', async () => withCloudinaryEnv(async () => {
+test('Gallery upload API returns exact Supabase schema cache error details', async () => withCloudinaryEnv(async () => {
   const result = await handleGalleryUpload(request(galleryForm()), deps({ insertRow: async (table, body) => {
-    if (table === 'gallery_images') throw Object.assign(new Error("Could not find the 'subcategory' column of 'gallery_images' in the schema cache"), { code: 'PGRST204' })
+    if (table === 'gallery_images') throw Object.assign(new Error("Could not find the 'subcategory' column of 'gallery_images' in the schema cache"), { code: 'PGRST204', hint: 'reload schema' })
     return [{ id: 'asset-1', ...body }]
   } }))
   assert.equal(result.status, 500)
-  assert.match(result.body.message, /missing subcategory column/)
+  assert.match(result.body.message, /media_assets created but gallery_images insert failed: code PGRST204/)
+  assert.match(result.body.message, /subcategory/)
   assert.equal(result.body.details.table, 'gallery_images')
+  assert.equal(result.body.details.media_asset_id, 'asset-1')
+  assert.equal(result.body.details.hint, 'reload schema')
   assert.ok(result.body.details.payloadKeys.includes('subcategory'))
+}))
+
+test('Gallery upload API deletes newly-created orphan media asset when gallery insert fails', async () => withCloudinaryEnv(async () => {
+  const deleted = []
+  const result = await handleGalleryUpload(request(galleryForm()), deps({
+    insertRow: async (table, body) => {
+      if (table === 'gallery_images') throw Object.assign(new Error('not-null violation'), { code: '23502' })
+      return [{ id: 'asset-1', ...body }]
+    },
+    deleteRows: async (filter) => { deleted.push(filter); return null },
+  }))
+  assert.equal(result.status, 500)
+  assert.deepEqual(deleted, ['media_assets?id=eq.asset-1'])
 }))
 
 test('Gallery payload builders map form fields without requiring manual media_asset_id', () => {
